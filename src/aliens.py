@@ -28,7 +28,7 @@ class alien(pygame.sprite.Sprite):
       self.speed = -1 * self.speed;
     
     if(self.rect.bottom < height):
-      self.rect.centery += 0.8;
+      self.rect.centery += 1;
     else:
       # game over
       pass;
