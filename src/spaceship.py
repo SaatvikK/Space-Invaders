@@ -11,7 +11,8 @@ from bullet import bullet;
 #################################
 
 class spaceShip(pygame.sprite.Sprite):
-  def __init__(self, x, y, lives) -> None:
+  def __init__(self, x, y, lives, cooldown) -> None:
+    print("IN SPACE SHGIP", lives)
     pygame.sprite.Sprite.__init__(self);
     self.image = pygame.image.load("../assets/spaceship.png");
     self.rect = self.image.get_rect();
@@ -19,7 +20,7 @@ class spaceShip(pygame.sprite.Sprite):
     self.lives = lives;
     self.TotalLives = lives;
     self.BulletCooldown = {
-      "time": 500, # ms
+      "time": cooldown, # ms
       "TimeOfLastCooldownStart": 0
     };
 
@@ -47,10 +48,3 @@ class spaceShip(pygame.sprite.Sprite):
       return True;
     else:
       return False;
-    
-
-
-
-
-  
-
