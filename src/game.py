@@ -1,12 +1,13 @@
 ############ IMPORTS ############
 # Libraries
 from typing import Dict
+from dotenv.main import dotenv_values
 import pygame;
 import random as rand;
 import json;
 import os;
 import time;
-import pymongo as db;
+import pymongo as mongo;
 import dotenv as env;
 
 # Other classes
@@ -17,7 +18,10 @@ from bullet import alienBullet;
 #################################
 
 class game():
-  def __init__(self) -> None:
+  def __init__(self, SpaceshipLives, cooldowns, difficulty) -> None:
+    self.difficulty = difficulty;
+    self.cooldowns = cooldowns;
+    self.SpaceshipLives = SpaceshipLives;
     pygame.init();
     # Window init:
     self.WinWidth, self.WinHeight = 600, 800;
@@ -28,11 +32,10 @@ class game():
 
     pygame.font.init();
     self.font = pygame.font.SysFont("Constantia", 30);
-    self.GameID = self.generateGameID();
-    self.saveGame();
-    self.createSprites();
-    self.makeAliens();
-    self.gameLoop();
+    self.AlienBulletCooldown = {
+      "time": self.cooldowns["alien"], # ms
+      "TimeOfLastCooldownStart": 0
+    };
     return None;
   
   def generateGameID(self):
@@ -52,21 +55,15 @@ class game():
     self.SpaceshipGroup, self.BulletGroup = pygame.sprite.Group(), pygame.sprite.Group();
     self.AliensGroup = pygame.sprite.Group();
     self.AlienBulletGroup = pygame.sprite.Group();
-    self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, 3);
+    self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, self.SpaceshipLives, self.cooldowns["player"]);
     self.SpaceshipGroup.add(self.ThisSpaceship);
   
   def makeAliens(self):
     rows, cols = 5, 5;
     for i in range(rows):
       for j in range(cols):
-        NewAlien = alien(100 + (j*100), 100 + (i*70));
+        NewAlien = alien(100 + (j*100), 100 + (i*70), self.cooldowns["AlienBulletsMax"]);
         self.AliensGroup.add(NewAlien);
-
-    self.AlienBulletCooldown = {
-      "time": 1000, # ms
-      "TimeOfLastCooldownStart": 0
-    };
-
   
   def scoreCounter(self):
     img = self.font.render("Score: " + str(self.score), True, (255, 255, 255));
@@ -121,6 +118,40 @@ class game():
       pygame.display.update();
     pygame.quit();
   
+  def load(self, GameID):
+    self.GameID = GameID;
+    print("id", self.GameID);
+    
+    def loadStats():
+      with open("../database/" + str(self.GameID) + "/stats/score.json", "r") as file:
+        data = json.load(file);
+        self.score = data["score"];
+        print("score", self.score)
+      
+      with open("../database/" + str(self.GameID) + "/stats/wave.json", "r") as file:
+        data = json.load(file);
+        self.wave = data["wave"];
+        print("wave", self.wave)
+    
+    def loadSettings():
+      with open("../database/" + str(self.GameID) + "/settings/difficulty.json") as file:
+        data = json.load(file);
+        self.difficulty = data["difficulty"];
+        print("diff", self.difficulty)
+        self.AlienBulletCooldown["time"] = data["AlienCooldown"];
+        print("alien cooldown", self.AlienBulletCooldown["time"])
+        self.ThisSpaceship.BulletCooldown["time"] = data["PlayerCooldown"];
+        print("ship cooldown", self.ThisSpaceship.BulletCooldown["time"])
+        self.cooldowns["AlienBulletsMax"] = data["AlienBulletsMax"];
+        print("Max bullets", self.cooldowns["AlienBulletsMax"]);
+      
+      with open("../database/" + str(self.GameID) + "/settings/lives.json") as file:
+        data = json.load(file);
+        self.ThisSpaceship.lives = data["LivesRemaining"];
+        self.ThisSpaceship.TotalLives = data["TotalLives"];
+
+    loadStats(); loadSettings();
+    
   def saveGame(self):
     def makeDB() -> str:
       DBLoc = "../database/" + str(self.GameID) + "/";
@@ -135,17 +166,30 @@ class game():
     def save(DBLoc: str, DictToSave: dict, collection: str):
       try:
         with open(DBLoc + collection, "w+") as file:
+
+          
           json.dump(DictToSave, file);
       
       except Exception as e: print("uh oh lol"); print(e);
     
     DBLoc = makeDB();
-    save(DBLoc, {"score": self.score}, "stats/score.json");
-    save(DBLoc, {"wave": self.wave}, "stats/wave.json");
+    save(DBLoc, {"identifier": 0, "score": self.score}, "stats/score.json");
+    save(DBLoc, {"identifier": 1, "wave": self.wave}, "stats/wave.json");
+    save(DBLoc, {"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
+    save(DBLoc, {"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
 
     def backupToMongo():
-      env.load_dotenv();
-      
-      client = db.MongoClient("mongodb+srv://SaatvikK:PLCYPCJVLzHL78C@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+      # Backing up to the MongoDB Atlas server.
+      stuff = env.dotenv_values(".env");
+      MongoPwd = stuff["MONGO_PWD"];
+      client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+      db = client[str(self.GameID)];
+      StatsCol, SettingsCol = db["stats"], db["settings"];
+      db.drop_collection("stats");
+      db.drop_collection("settings");
+      StatsCol.insert_one({"identifier": 0, "score": self.score});
+      StatsCol.insert_one({"identifier": 1, "wave": self.wave});
+      SettingsCol.insert_one({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]});
+      SettingsCol.insert_one({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives});
 
-
+    backupToMongo();
