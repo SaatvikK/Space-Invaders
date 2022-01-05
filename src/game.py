@@ -6,7 +6,8 @@ import random as rand;
 import json;
 import os;
 import time;
-#import pymongo as db;
+import pymongo as db;
+import dotenv as env;
 
 # Other classes
 from spaceship import spaceShip;
@@ -142,6 +143,9 @@ class game():
     save(DBLoc, {"score": self.score}, "stats/score.json");
     save(DBLoc, {"wave": self.wave}, "stats/wave.json");
 
-
+    def backupToMongo():
+      env.load_dotenv();
+      
+      client = db.MongoClient("mongodb+srv://SaatvikK:PLCYPCJVLzHL78C@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
 
 
