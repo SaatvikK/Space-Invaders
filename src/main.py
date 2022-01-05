@@ -8,6 +8,7 @@ import time;
 
 # Other classes
 from game import game;
+from MainMenu import mainMenu;
 #################################
 
 class Main():
@@ -15,7 +16,9 @@ class Main():
     return None;
   
   def main(self):
-    newgame = game();
+    newmenu = mainMenu();
+    newmenu.menuStart();
+    newgame = game(int(newmenu.Lives), newmenu.cooldowns);
 
 
 if(__name__ == "__main__"): 
