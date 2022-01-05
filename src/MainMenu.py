@@ -17,15 +17,14 @@ class mainMenu:
   def __init__(self) -> None:
     self.window = tk.Tk();
     self.ScreenWidth, self.ScreenHeight = self.window.winfo_screenwidth(), self.window.winfo_screenheight();
-    self.window.title("CATAN: Main Menu");
+    self.window.title("Space Invaders: Main Menu");
     self.window.iconbitmap(); #Icon for window
     self.ButtonFont = tkFont.Font(family='Georgia', size=20, weight='bold');
-    self.AmountPlayers = 0;
     return None;
   
   def menuStart(self) -> None:
     def backgroundDisplay():
-      self.bg = tk.PhotoImage(file = "../resources/MainMenuBG.png");
+      self.bg = tk.PhotoImage(file = "../assets/bg.png");
       OpenImg = tk.Label(self.window, image = self.bg);
       OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
     
@@ -51,26 +50,39 @@ class mainMenu:
       widget.destroy();
     
     # Creating the background
-    self.bg = tk.PhotoImage(file = "../resources/NewGameSettingsBG.png");
+    self.bg = tk.PhotoImage(file = "../assets/bg.png");
     OpenImg = tk.Label(self.window, image = self.bg);
     OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
 
-    title = tk.Label(self.window, text = "How many players will there be?", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+    ## Lives settings
+    title = tk.Label(self.window, text = "Lives:", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
+    Lives = tk.StringVar(self.window); Lives.set("Select amount of lives");
 
-    AmountPlayers = tk.StringVar(self.window); AmountPlayers.set("Select amount of players");
+    LivesMenu = tk.OptionMenu(self.window, Lives, *["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]) 
+    LivesMenu.place(x = 50, y= 100);
 
-    PlayersMenu = tk.OptionMenu(self.window, AmountPlayers, *["2 Players", "3 Players", "4 Players"]) 
-    PlayersMenu.place(x = 50, y= 100);
+    ## Difficulty settings
+    title = tk.Label(self.window, text = "Difficulty:", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+    title.place(x = 0, y = 150);
+
+    difficulty = tk.StringVar(self.window); difficulty.set("Select difficulty.")
+    DiffMenu = tk.OptionMenu(self.window, difficulty, *["Hard", "Medium", "Easy", "Casual/Normal"]);
+    DiffMenu.place(x = 50, y = 200);
 
     def beginGame():
-      print("Beginning game", AmountPlayers.get())
-      self.AmountPlayers = int(AmountPlayers.get()[0]);
+      print("Beginning game", Lives.get())
+      self.Lives = int(Lives.get());
+      print(difficulty.get())
+      if(difficulty.get() == "Hard"): self.cooldowns = {"alien": 100, "player": 1000, "AlienBulletsMax": 20};
+      elif(difficulty.get() == "Medium"): self.cooldowns = {"alien": 300, "player": 500, "AlienBulletsMax": 7};
+      elif(difficulty.get() == "Easy"): self.cooldowns = {"alien": 3000, "player": 100, "AlienBulletsMax": 3};
+      elif(difficulty.get() == "Casual/Normal"): self.cooldowns = {"alien": 1000, "player": 500, "AlienBulletsMax": 5};
       self.window.destroy();
       
 
     SubmitButton = tk.Button(self.window, text = "Submit", command = beginGame);
-    SubmitButton.place(x = 5, y = 110);
+    SubmitButton.place(x = 5, y = 1000);
 
     #print("hihihihihi", AmountPlayers.get())
     #return int(AmountPlayers.get()[0]);
