@@ -6,7 +6,7 @@ from tkinter import font as tkFont;
 import tkinter.filedialog;
 import PIL as pil;
 from PIL import ImageTk, Image;
-import glob;
+import os;
 import json;
 
 # Classes
@@ -44,7 +44,7 @@ class mainMenu:
     self.window.mainloop();
   
   def newGame(self):
-    self.window.title("CATAN: Create a New Game");
+    self.window.title("Space Invaders: New Game");
     # Destroy everything on the screen (i.e. the main menu)
     for widget in self.window.winfo_children():
       widget.destroy();
@@ -71,9 +71,11 @@ class mainMenu:
     DiffMenu.place(x = 50, y = 200);
 
     def beginGame():
+      self.type = "create";
       print("Beginning game", Lives.get())
       self.Lives = int(Lives.get());
       print(difficulty.get())
+      self.difficulty = difficulty.get();
       if(difficulty.get() == "Hard"): self.cooldowns = {"alien": 100, "player": 1000, "AlienBulletsMax": 20};
       elif(difficulty.get() == "Medium"): self.cooldowns = {"alien": 300, "player": 500, "AlienBulletsMax": 7};
       elif(difficulty.get() == "Easy"): self.cooldowns = {"alien": 3000, "player": 100, "AlienBulletsMax": 3};
@@ -81,7 +83,7 @@ class mainMenu:
       self.window.destroy();
       
 
-    SubmitButton = tk.Button(self.window, text = "Submit", command = beginGame);
+    SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
     SubmitButton.place(x = 5, y = 1000);
 
     #print("hihihihihi", AmountPlayers.get())
@@ -89,6 +91,33 @@ class mainMenu:
 
   def loadGame(self):
     # opening load-game menu
-    pass;
+    self.window.title("Space Invaders: Load a Game");
+    # Destroy everything on the screen (i.e. the main menu)
+    for widget in self.window.winfo_children():
+      widget.destroy();
+    
+    # Creating the background
+    self.bg = tk.PhotoImage(file = "../assets/bg.png");
+    OpenImg = tk.Label(self.window, image = self.bg);
+    OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
+
+    games = os.listdir("../database");
+
+    ## Games
+    title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+    title.place(x = 0, y = 0);
+    GamesDropDown = tk.StringVar(self.window); GamesDropDown.set("Select a game...");
+    GamesMenu = tk.OptionMenu(self.window, GamesDropDown, *games);
+    GamesMenu.place(x = 50, y= 100);
+
+    def beginGame():
+      self.type = "load";
+      self.GameID = GamesDropDown.get();
+      self.window.destroy();
+      
+    SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
+    SubmitButton.place(x = 5, y = 1000);
+    
+
 
   def exitApp(self): exit();
