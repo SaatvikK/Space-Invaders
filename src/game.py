@@ -1,12 +1,10 @@
 ############ IMPORTS ############
 # Libraries
-from typing import Dict
 import pygame;
 import random as rand;
 import json;
 import os;
 import time;
-#import pymongo as db;
 
 # Other classes
 from spaceship import spaceShip;
@@ -16,7 +14,9 @@ from bullet import alienBullet;
 #################################
 
 class game():
-  def __init__(self) -> None:
+  def __init__(self, SpaceshipLives, cooldowns) -> None:
+    self.cooldowns = cooldowns;
+    self.SpaceshipLives = SpaceshipLives;
     pygame.init();
     # Window init:
     self.WinWidth, self.WinHeight = 600, 800;
@@ -51,18 +51,18 @@ class game():
     self.SpaceshipGroup, self.BulletGroup = pygame.sprite.Group(), pygame.sprite.Group();
     self.AliensGroup = pygame.sprite.Group();
     self.AlienBulletGroup = pygame.sprite.Group();
-    self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, 3);
+    self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, self.SpaceshipLives, self.cooldowns["player"]);
     self.SpaceshipGroup.add(self.ThisSpaceship);
   
   def makeAliens(self):
     rows, cols = 5, 5;
     for i in range(rows):
       for j in range(cols):
-        NewAlien = alien(100 + (j*100), 100 + (i*70));
+        NewAlien = alien(100 + (j*100), 100 + (i*70), self.cooldowns["AlienBulletsMax"]);
         self.AliensGroup.add(NewAlien);
 
     self.AlienBulletCooldown = {
-      "time": 1000, # ms
+      "time": self.cooldowns["alien"], # ms
       "TimeOfLastCooldownStart": 0
     };
 
@@ -141,7 +141,3 @@ class game():
     DBLoc = makeDB();
     save(DBLoc, {"score": self.score}, "stats/score.json");
     save(DBLoc, {"wave": self.wave}, "stats/wave.json");
-
-
-
-
