@@ -59,9 +59,20 @@ class game():
     self.SpaceshipGroup.add(self.ThisSpaceship);
   
   def makeAliens(self):
-    rows, cols = 5, 5;
-    for i in range(rows):
-      for j in range(cols):
+    print("redrawing aliens...")
+    self.rows, self.cols = 1, 5;
+    tmprows, tmpcols = self.rows, self.cols;
+    if(self.wave != 1):
+      if(self.wave <= 5): 
+        self.rows += 1;
+        print("added", self.rows - tmprows, "rows")
+      elif(self.wave > 5 and self.waves < 10): 
+        self.cols += 1;
+        print("added", self.cols - tmpcols, "cols")
+
+
+    for i in range(self.rows):
+      for j in range(self.cols):
         NewAlien = alien(100 + (j*100), 100 + (i*70), self.cooldowns["AlienBulletsMax"]);
         self.AliensGroup.add(NewAlien);
   
@@ -74,10 +85,18 @@ class game():
       img = pygame.font.SysFont("Constantia", 40).render("GAME OVER!", True, (255, 255, 255));
       self.screen.blit(img, (self.WinWidth/2 - 100, self.WinHeight/2 - 100));
 
+  def waveHandler(self):
+    if(len(self.AliensGroup.sprites()) <= 0): 
+      self.wave += 1;
+      print("wave now updated to", self.wave)
+      self.makeAliens();
+      
+
 
   def gameLoop(self):
     running = True;
     while(running):
+      self.waveHandler();
       self.clock();
       self.screen.blit(self.background, (0, 0));
 
@@ -103,7 +122,9 @@ class game():
       else:
         self.ThisSpaceship.move();
       
-      Attacker = rand.choice(self.AliensGroup.sprites());
+      try:
+        Attacker = rand.choice(self.AliensGroup.sprites());
+      except: pass;
       st = Attacker.shoot(self.WinHeight, self.AlienBulletGroup.sprites(), self.AlienBulletCooldown, self.SpaceshipGroup);
       if(st == True): 
         self.AlienBulletGroup.add(Attacker.NewBullet);
