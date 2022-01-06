@@ -5,16 +5,28 @@ from tkinter import *;
 from tkinter import font as tkFont;
 import tkinter.filedialog;
 import os;
+import json;
+
+# Other Modules
+from mergesort import *; # Importing my merge sort algorithm
 #################################
 
 class mainMenu:
-  def __init__(self) -> None:
+  def __init__(self, IsDev, usrn) -> None:
+    self.usrn = usrn;
+    self.IsDev = IsDev;
     self.window = tk.Tk();
     self.ScreenWidth, self.ScreenHeight = self.window.winfo_screenwidth(), self.window.winfo_screenheight();
     self.window.title("Space Invaders: Main Menu");
     self.window.iconbitmap(); #Icon for window
     self.ButtonFont = tkFont.Font(family='Georgia', size=20, weight='bold');
     return None;
+  
+  def backgroundDisplay(self):
+    # Creating the background
+    self.bg = tk.PhotoImage(file = "../assets/bg.png");
+    OpenImg = tk.Label(self.window, image = self.bg);
+    OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
   
   def menuStart(self) -> None:
     def backgroundDisplay():
@@ -29,13 +41,46 @@ class mainMenu:
       LoadGame = tk.Button(self.window, text = "Load Game", command = lambda: self.loadGame(), height = 1, width = 10, font = self.ButtonFont);
       LoadGame.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 40);
 
+      StatsPageButton = tk.Button(self.window, text = "Your Stats", command = lambda: self.statsPage(), height = 1, width = 10, font = self.ButtonFont);
+      StatsPageButton.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 120)
+
       Exit = tk.Button(self.window, text = "Exit App", command = lambda: self.exitApp(), height = 1, width = 10, font = self.ButtonFont);
-      Exit.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 120);
-  
+      Exit.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 200);
 
     backgroundDisplay();
     menuButtons();
     self.window.mainloop();
+  
+  def statsPage(self):
+    def readStats(games: list) -> dict:
+      stats = {}; # This holds each game id and it's score as a key-value pair in a dictionary: `{"gameid": {score: "score", wave: "wave"}}`
+      for i in range(len(games)):
+        with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
+          data = json.load(file);
+          if(data["username"] == self.usrn):
+            score, wave, AllScores = None, None, [];
+            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile: 
+              score = json.load(statsfile)["score"];
+              AllScores.append(score);
+            with open("../database" + str(games[i]) + "/stats/wave.json", "r") as statsfile: wave = json.load(statsfile)["wave"];
+            stats[games[i]] = {"score": score, "wave": wave};
+      return stats, AllScores;
+
+
+    for widget in self.window.winfo_children():
+      widget.destroy();
+    
+    self.backgroundDisplay();
+
+    title = tk.Label(self.window, text = "Your Stats", font = tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+    title.place(x = 0, y = 0);
+
+    stats, AllScores = readStats(os.listdir("../database/"));
+    tmp = driverMethod(AllScores); # Merge sorting the AllScores list.
+    AllScores = tmp.reverse(); # Reversing the list so that the highest score is at index = 0.
+
+
+    return;
   
   def newGame(self):
     self.window.title("Space Invaders: New Game");
@@ -43,16 +88,13 @@ class mainMenu:
     for widget in self.window.winfo_children():
       widget.destroy();
     
-    # Creating the background
-    self.bg = tk.PhotoImage(file = "../assets/bg.png");
-    OpenImg = tk.Label(self.window, image = self.bg);
-    OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
+    self.backgroundDisplay();
 
     ## Lives settings
     title = tk.Label(self.window, text = "Lives:", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
-    Lives = tk.StringVar(self.window); Lives.set("Select amount of lives");
 
+    Lives = tk.StringVar(self.window); Lives.set("Select amount of lives");
     LivesMenu = tk.OptionMenu(self.window, Lives, *["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]) 
     LivesMenu.place(x = 50, y= 100);
 
@@ -84,19 +126,25 @@ class mainMenu:
     #return int(AmountPlayers.get()[0]);
 
   def loadGame(self):
+    def checkIfGameOwnedByCurrentUser(games: list) -> list:
+      OwnedGames = [];
+      for i in range(len(games)):
+        with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
+          data = json.load(file);
+          if(data["username"] == self.usrn):
+            OwnedGames.append(games[i]);
+      return OwnedGames;
+
+
     # opening load-game menu
     self.window.title("Space Invaders: Load a Game");
     # Destroy everything on the screen (i.e. the main menu)
     for widget in self.window.winfo_children():
       widget.destroy();
+
+    self.backgroundDisplay();
+    games = checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
     
-    # Creating the background
-    self.bg = tk.PhotoImage(file = "../assets/bg.png");
-    OpenImg = tk.Label(self.window, image = self.bg);
-    OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
-
-    games = os.listdir("../database");
-
     ## Games
     title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
@@ -112,6 +160,4 @@ class mainMenu:
     SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
     SubmitButton.place(x = 5, y = 1000);
     
-
-
   def exitApp(self): exit();

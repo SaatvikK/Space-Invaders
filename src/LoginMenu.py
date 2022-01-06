@@ -37,7 +37,7 @@ class loginMenu():
       RealPwd = ThisCollection.find_one({"username": usrn})["pwd"];
 
       if(pwd != RealPwd): return {"status": False, "reason": "pwd"};
-      else: return {"status": True};
+      else: return {"status": True, "usrn": usrn};
 
   def signup(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
     stuff = env.dotenv_values(".env");

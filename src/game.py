@@ -1,7 +1,5 @@
 ############ IMPORTS ############
 # Libraries
-from typing import Dict
-from dotenv.main import dotenv_values
 import pygame;
 import random as rand;
 import json;
@@ -12,13 +10,13 @@ import dotenv as env;
 
 # Other classes
 from spaceship import spaceShip;
-from bullet import bullet;
 from aliens import alien;
-from bullet import alienBullet;
 #################################
 
 class game():
-  def __init__(self, SpaceshipLives, cooldowns, difficulty) -> None:
+  def __init__(self, SpaceshipLives, cooldowns, difficulty, IsDev, usrn) -> None:
+    self.usrn = usrn;
+    self.IsDev = IsDev;
     self.difficulty = difficulty;
     self.cooldowns = cooldowns;
     self.SpaceshipLives = SpaceshipLives;
@@ -29,6 +27,7 @@ class game():
     pygame.display.set_caption("Space Invaders");
     self.background = pygame.image.load("../assets/bg.png");
     self.score, self.wave = 0, 1;
+    self.rows, self.cols = 1, 5;
 
     pygame.font.init();
     self.font = pygame.font.SysFont("Constantia", 30);
@@ -39,14 +38,14 @@ class game():
     return None;
   
   def generateGameID(self):
+    NewGameID = None;
     try:
       games = os.listdir("../database");
-      NewGameID = rand.randint(0, 50);
-      while(str(NewGameID) in games): NewGameID = rand.randint(0, 50);
-      return NewGameID;
-    except: return "1";
+      if(len(games) == 0): return 1;
+      NewGameID = int(max(games)) + 1;
+    except: NewGameID = 1;
+    return NewGameID;
   
-
   def clock(self):
     clock = pygame.time.Clock();
     clock.tick(60); # fps
@@ -57,19 +56,14 @@ class game():
     self.AlienBulletGroup = pygame.sprite.Group();
     self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, self.SpaceshipLives, self.cooldowns["player"]);
     self.SpaceshipGroup.add(self.ThisSpaceship);
+    self.ExplosionGroup = pygame.sprite.Group();
   
   def makeAliens(self):
-    print("redrawing aliens...")
-    self.rows, self.cols = 1, 5;
-    tmprows, tmpcols = self.rows, self.cols;
     if(self.wave != 1):
       if(self.wave <= 5): 
         self.rows += 1;
-        print("added", self.rows - tmprows, "rows")
-      elif(self.wave > 5 and self.waves < 10): 
+      elif(self.wave > 5 and self.wave <= 10): 
         self.cols += 1;
-        print("added", self.cols - tmpcols, "cols")
-
 
     for i in range(self.rows):
       for j in range(self.cols):
@@ -82,8 +76,9 @@ class game():
   
   def gameOver(self):
     if(self.ThisSpaceship.lives <= 0 or len(self.AliensGroup.sprites()) <= 0):
-      img = pygame.font.SysFont("Constantia", 40).render("GAME OVER!", True, (255, 255, 255));
+      img = self.font.render("GAME OVER!", True, (255, 255, 255));
       self.screen.blit(img, (self.WinWidth/2 - 100, self.WinHeight/2 - 100));
+      self.ThisSpaceship.kill(); time.sleep(2); exit();
 
   def waveHandler(self):
     if(len(self.AliensGroup.sprites()) <= 0): 
@@ -91,8 +86,6 @@ class game():
       print("wave now updated to", self.wave)
       self.makeAliens();
       
-
-
   def gameLoop(self):
     running = True;
     while(running):
@@ -110,9 +103,11 @@ class game():
       self.BulletGroup.draw(self.screen);
       self.AliensGroup.draw(self.screen);
       self.AlienBulletGroup.draw(self.screen);
-      self.BulletGroup.update(self.AliensGroup, self.score);
+      self.ExplosionGroup.draw(self.screen);
+      self.ExplosionGroup.update();
+      self.BulletGroup.update(self.AliensGroup, self.score, self.ExplosionGroup);
       self.AliensGroup.update(self.WinHeight);
-      self.AlienBulletGroup.update(self.WinHeight, self.SpaceshipGroup, self.ThisSpaceship);
+      self.AlienBulletGroup.update(self.WinHeight, self.SpaceshipGroup, self.ThisSpaceship, self.ExplosionGroup);
 
       if(pygame.key.get_pressed()[pygame.K_SPACE]):
         st = self.ThisSpaceship.move();
@@ -133,8 +128,6 @@ class game():
       try: 
         if(self.NewBullet.HasHitAlien == True): self.score += 1; self.NewBullet.HasHitAlien = False;
       except: pass;
-
-      
 
       pygame.display.update();
     pygame.quit();
@@ -187,8 +180,6 @@ class game():
     def save(DBLoc: str, DictToSave: dict, collection: str):
       try:
         with open(DBLoc + collection, "w+") as file:
-
-          
           json.dump(DictToSave, file);
       
       except Exception as e: print("uh oh lol"); print(e);
@@ -198,6 +189,7 @@ class game():
     save(DBLoc, {"identifier": 1, "wave": self.wave}, "stats/wave.json");
     save(DBLoc, {"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save(DBLoc, {"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
+    save(DBLoc, {"identifier": 0, "username": self.usrn}, "settings/player.json");
 
     def backupToMongo():
       # Backing up to the MongoDB Atlas server.
@@ -212,5 +204,6 @@ class game():
       StatsCol.insert_one({"identifier": 1, "wave": self.wave});
       SettingsCol.insert_one({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]});
       SettingsCol.insert_one({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives});
+      SettingsCol.insert_one({"identifier": 0, "username": self.usrn});
 
     backupToMongo();
