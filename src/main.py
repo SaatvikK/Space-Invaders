@@ -1,13 +1,5 @@
 ############ IMPORTS ############
-# Libraries
-from logging import log
-import pygame;
-import random as rand;
-import json;
-from glob import glob;
-import time;
-
-# Other classes
+# Classes
 from game import game;
 from MainMenu import mainMenu;
 from LoginMenu import loginMenu;
@@ -39,8 +31,6 @@ class Main():
         newgame.makeAliens();
         newgame.saveGame();
         newgame.gameLoop();
-
-
 
 if(__name__ == "__main__"): 
   MainObj = Main();

@@ -1,9 +1,6 @@
 ############ IMPORTS ############
 # Libraries
 import pygame;
-import random as rand;
-import json;
-import math
 #################################
 
 class bullet(pygame.sprite.Sprite):

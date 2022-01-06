@@ -2,8 +2,6 @@
 # Libraries
 import pygame;
 import random as rand;
-import json;
-import math;
 import time;
 
 # Other classes

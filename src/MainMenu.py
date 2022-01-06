@@ -4,13 +4,7 @@ import tkinter as tk;
 from tkinter import *;
 from tkinter import font as tkFont;
 import tkinter.filedialog;
-import PIL as pil;
-from PIL import ImageTk, Image;
 import os;
-import json;
-
-# Classes
-from game import game;
 #################################
 
 class mainMenu:
