@@ -53,18 +53,14 @@ class mainMenu:
   
   def statsPage(self):
     def readStats(games: list) -> dict:
-      stats = {}; # This holds each game id and it's score as a key-value pair in a dictionary: `{"gameid": {score: "score", wave: "wave"}}`
+     
       for i in range(len(games)):
         with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
           data = json.load(file);
           if(data["username"] == self.usrn):
-            score, wave, AllScores = None, None, [];
-            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile: 
-              score = json.load(statsfile)["score"];
-              AllScores.append(score);
-            with open("../database" + str(games[i]) + "/stats/wave.json", "r") as statsfile: wave = json.load(statsfile)["wave"];
-            stats[games[i]] = {"score": score, "wave": wave};
-      return stats, AllScores;
+            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: 
+              
+      return stats;
 
 
     for widget in self.window.winfo_children():
@@ -75,9 +71,12 @@ class mainMenu:
     title = tk.Label(self.window, text = "Your Stats", font = tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
 
-    stats, AllScores = readStats(os.listdir("../database/"));
+    games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
+    stats, AllScores = readStats(games);
     tmp = driverMethod(AllScores); # Merge sorting the AllScores list.
     AllScores = tmp.reverse(); # Reversing the list so that the highest score is at index = 0.
+    for i in range(len(AllScores)):
+      place = tk.Label(self.window, text = str(i + 1) + ". Game: " + str())
 
 
     return;
@@ -125,17 +124,16 @@ class mainMenu:
     #print("hihihihihi", AmountPlayers.get())
     #return int(AmountPlayers.get()[0]);
 
+  def checkIfGameOwnedByCurrentUser(self, games: list) -> list:
+    OwnedGames = [];
+    for i in range(len(games)):
+      with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
+        data = json.load(file);
+        if(data["username"] == self.usrn):
+          OwnedGames.append(games[i]);
+    return OwnedGames;
+
   def loadGame(self):
-    def checkIfGameOwnedByCurrentUser(games: list) -> list:
-      OwnedGames = [];
-      for i in range(len(games)):
-        with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
-          data = json.load(file);
-          if(data["username"] == self.usrn):
-            OwnedGames.append(games[i]);
-      return OwnedGames;
-
-
     # opening load-game menu
     self.window.title("Space Invaders: Load a Game");
     # Destroy everything on the screen (i.e. the main menu)
@@ -143,7 +141,7 @@ class mainMenu:
       widget.destroy();
 
     self.backgroundDisplay();
-    games = checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
+    games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
     
     ## Games
     title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));

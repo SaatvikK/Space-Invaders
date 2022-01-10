@@ -14,15 +14,17 @@ class loginMenu():
   def __init__(self) -> None:
     return None;
 
-  def hash(self, text: str) -> str:
+  def hash(text: str) -> str:
     print("inhash")
-    TextDec = [str(ord(c)) for c in text];
-    TextDecJoined = "".join(TextDec);
-    TextInBin = bin(int(TextDecJoined));
-    secret = bin(rand.randint(len(TextDecJoined), len(TextDecJoined)))[2:];
-    XORed = bin(int(TextInBin, 2) ^ int(secret, 2))[2:];
+    TextBin = "".join([str(bin(int(ord(c)))[2:]) for c in text]);
+    LengthOfBinary = len(TextBin);
+    K = 256 - (LengthOfBinary + 1 + 64);
+    TextBin = TextBin + ("0"*(K//2)); # Appending 0 to the string K times.
+    LengthOfBinary = len(TextBin);
+    FirstHalf, SecondHalf = TextBin[:LengthOfBinary//2], TextBin[LengthOfBinary//2 + 1:];
 
-    return hex(int("".join([str(int(c, 2)) for c in XORed])))[2:]
+    XORed = bin(int(FirstHalf, 2) ^ int(SecondHalf, 2))[2:];
+    return hex(int(XORed))[2:]
 
   def login(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
     stuff = env.dotenv_values(".env");
