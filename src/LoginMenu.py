@@ -8,23 +8,18 @@ import dotenv as env;
 import tkinter as tk;
 from tkinter import *;
 from tkinter import font as tkFont;
+import hashlib as hashes;
 #################################
 
 class loginMenu():
   def __init__(self) -> None:
     return None;
 
-  def hash(text: str) -> str:
-    print("inhash")
-    TextBin = "".join([str(bin(int(ord(c)))[2:]) for c in text]);
-    LengthOfBinary = len(TextBin);
-    K = 256 - (LengthOfBinary + 1 + 64);
-    TextBin = TextBin + ("0"*(K//2)); # Appending 0 to the string K times.
-    LengthOfBinary = len(TextBin);
-    FirstHalf, SecondHalf = TextBin[:LengthOfBinary//2], TextBin[LengthOfBinary//2 + 1:];
-
-    XORed = bin(int(FirstHalf, 2) ^ int(SecondHalf, 2))[2:];
-    return hex(int(XORed))[2:]
+  def thisHash(text: str) -> str:
+    SHAhash = hashes.new("sha512_256");
+    SHAhash.update(text.encode("utf-8")); # Encoding the input message into unicode 8 and then hashing it.
+    print(">>>>", SHAhash.hexdigest())
+    return SHAhash.hexdigest();
 
   def login(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
     stuff = env.dotenv_values(".env");
@@ -81,7 +76,9 @@ class loginMenu():
     
     def execSignUp():
       usrn = self.UserInp.get(1.0, "end-1c");
-      pwd = self.hash(self.PwdInp.get(1.0, "end-1c"));
+      pwdin = self.PwdInp.get(1.0, "end-1c");
+      print(pwdin)
+      pwd = self.thisHash(pwdin);
       self.res = self.signup(usrn, pwd);
       if(self.res["status"] == False):
         if(self.res["reason"] == "usrn_already_exists"): print("Username already exists");

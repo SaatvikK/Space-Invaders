@@ -53,13 +53,12 @@ class mainMenu:
   
   def statsPage(self):
     def readStats(games: list) -> dict:
-     
       for i in range(len(games)):
         with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
           data = json.load(file);
           if(data["username"] == self.usrn):
             with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: 
-              
+              pass;        
       return stats;
 
 
