@@ -1,1 +1,3 @@
 /src/.env
+/database
+/src/__pycache__

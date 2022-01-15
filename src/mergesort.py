@@ -11,12 +11,12 @@ def merge(arr, LeftIndex, RightIndex, middle):
     # If LeftArrCopy has smaller element, put it in sorted part. 
     # Then, increment the left copy pointer (LeftCopyIndex):
 
-    if(LeftArrCopy[LeftCopyIndex] <= RightArrCopy[RightCopyIndex]):
-      arr[SortedIndex] = LeftArrCopy[LeftCopyIndex];
+    if(LeftArrCopy[LeftCopyIndex]["score"] <= RightArrCopy[RightCopyIndex]["score"]):
+      arr[SortedIndex]["score"] = LeftArrCopy[LeftCopyIndex]["score"];
       LeftCopyIndex += 1;
     
     else: #This is just the opposite of the above if-statement
-      arr[SortedIndex] = RightArrCopy[RightCopyIndex];
+      arr[SortedIndex]["score"] = RightArrCopy[RightCopyIndex]["score"];
       RightCopyIndex += 1;
     
     # Increment sorted index pointer:
@@ -24,12 +24,12 @@ def merge(arr, LeftIndex, RightIndex, middle):
 
   # Ran out of elements in one of the left/right copies so look at the remaining elements and sort them:
   while(LeftCopyIndex < len(LeftArrCopy)):
-    arr[SortedIndex] = LeftArrCopy[LeftCopyIndex];
+    arr[SortedIndex]["score"] = LeftArrCopy[LeftCopyIndex]["score"];
     LeftCopyIndex += 1;
     SortedIndex += 1;
   
   while(RightCopyIndex < len(RightArrCopy)):
-    arr[SortedIndex] = RightArrCopy[RightCopyIndex];
+    arr[SortedIndex]["score"] = RightArrCopy[RightCopyIndex]["score"];
     RightCopyIndex += 1;
     SortedIndex += 1;  
 

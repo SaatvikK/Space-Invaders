@@ -53,12 +53,21 @@ class mainMenu:
   
   def statsPage(self):
     def readStats(games: list) -> dict:
+      stats = [];
       for i in range(len(games)):
         with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
           data = json.load(file);
           if(data["username"] == self.usrn):
-            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: 
-              pass;        
+            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1:
+              data1 = json.load(statsfile1);
+
+              with open("../database/" + str(games[i]) + "/stats/wave.json", "r") as statsfile2:
+                data2 = json.load(statsfile2);
+                stats.append({
+                  "score": data1["score"], 
+                  "wave": data2["wave"],
+                  "id": games[i]
+                });
       return stats;
 
 
@@ -71,12 +80,24 @@ class mainMenu:
     title.place(x = 0, y = 0);
 
     games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
-    stats, AllScores = readStats(games);
-    tmp = driverMethod(AllScores); # Merge sorting the AllScores list.
-    AllScores = tmp.reverse(); # Reversing the list so that the highest score is at index = 0.
-    for i in range(len(AllScores)):
-      place = tk.Label(self.window, text = str(i + 1) + ". Game: " + str())
-
+    stats = readStats(games);
+    stats = driverMethod(stats); # Merge sorting the AllScores list.
+    for i in range(len(stats)):
+      boop = tk.Label(
+        self.window, 
+        text = 
+          str(i + 1) + 
+          ") Game: " + 
+          str(stats[i]["id"]) + 
+          ", Score: " + 
+          str(stats[i]["score"]) + 
+          ", Wave: " + 
+          str(stats[i]["wave"]
+        ),
+        font = tkFont.Font(family = "Georgia", size = 15, weight = "bold")
+      );
+      if(i == 0): boop.place(x = 50, y = 100);
+      else: boop.place(x = 50, y = i*150);
 
     return;
   

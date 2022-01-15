@@ -15,10 +15,9 @@ class loginMenu():
   def __init__(self) -> None:
     return None;
 
-  def thisHash(text: str) -> str:
+  def thisHash(self, text: str) -> str:
     SHAhash = hashes.new("sha512_256");
     SHAhash.update(text.encode("utf-8")); # Encoding the input message into unicode 8 and then hashing it.
-    print(">>>>", SHAhash.hexdigest())
     return SHAhash.hexdigest();
 
   def login(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
@@ -64,7 +63,7 @@ class loginMenu():
     def execLogin():
       print("HIHIHII")
       usrn = self.UserInp.get(1.0, "end-1c");
-      pwd = self.hash(self.PwdInp.get(1.0, "end-1c"));
+      pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c"));
       self.res = self.login(usrn, pwd);
       if(self.res["status"] == True):
         print(self.res)
@@ -76,9 +75,7 @@ class loginMenu():
     
     def execSignUp():
       usrn = self.UserInp.get(1.0, "end-1c");
-      pwdin = self.PwdInp.get(1.0, "end-1c");
-      print(pwdin)
-      pwd = self.thisHash(pwdin);
+      pwd = self.hash(self.PwdInp.get(1.0, "end-1c"));
       self.res = self.signup(usrn, pwd);
       if(self.res["status"] == False):
         if(self.res["reason"] == "usrn_already_exists"): print("Username already exists");

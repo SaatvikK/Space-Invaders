@@ -1,1 +1,1 @@
-{"identifier": 0, "difficulty": "Hard", "AlienCooldown": 100, "PlayerCooldown": 1000, "AlienBulletsMax": 20}
+{"identifier": 0, "difficulty": "Easy", "AlienCooldown": 3000, "PlayerCooldown": 100, "AlienBulletsMax": 3}
