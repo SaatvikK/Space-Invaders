@@ -81,6 +81,9 @@ class game():
       self.ThisSpaceship.kill(); time.sleep(2); exit();
 
   def waveHandler(self):
+    font = pygame.font.SysFont("Constantia", 30);
+    img = font.render("Wave: " + str(self.wave), True, (255, 255, 255));
+    self.screen.blit(img, (0, 50));
     if(len(self.AliensGroup.sprites()) <= 0): 
       self.wave += 1;
       print("wave now updated to", self.wave)
@@ -94,7 +97,7 @@ class game():
       self.screen.blit(self.background, (0, 0));
 
       for event in pygame.event.get():
-        if(event.type == pygame.QUIT): self.saveGame(); running = False;
+        if(event.type == pygame.QUIT): running = False; self.saveGame(); exit();
 
       self.scoreCounter();
       self.gameOver();

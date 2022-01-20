@@ -1,6 +1,7 @@
 ############ IMPORTS ############
 # Libraries
 import pygame;
+import time;
 #################################
 
 class explosion(pygame.sprite.Sprite):
@@ -32,4 +33,6 @@ class explosion(pygame.sprite.Sprite):
       self.IndexOfImgList += 1;
       self.image = self.ImgList[self.IndexOfImgList];
     
-    if(self.IndexOfImgList > (len(self.ImgList) - 1) and self.counter > self.threshold): self.kill();
+    if((self.IndexOfImgList > (len(self.ImgList) - 1) and self.counter > self.threshold) or self.IndexOfImgList == 4): 
+      print("hiiii")
+      self.kill();
