@@ -35,12 +35,15 @@ class mainMenu:
       OpenImg.place(x = 0, y = 0, relwidth = 1, relheight = 1);
     
     def menuButtons():
+      # "New Game" Button
       NewGame = tk.Button(self.window, text = "New Game", command = lambda: self.newGame(), height = 1, width = 10, font = self.ButtonFont);
       NewGame.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 - 40);
-
+      
+      # "Load Game" Button
       LoadGame = tk.Button(self.window, text = "Load Game", command = lambda: self.loadGame(), height = 1, width = 10, font = self.ButtonFont);
       LoadGame.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 40);
 
+      # "Stats Page" Button
       StatsPageButton = tk.Button(self.window, text = "Your Stats", command = lambda: self.statsPage(), height = 1, width = 10, font = self.ButtonFont);
       StatsPageButton.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 120)
 
@@ -52,26 +55,37 @@ class mainMenu:
     self.window.mainloop();
   
   def statsPage(self):
+    # Getting the stats of each game that THIS player has played.
     def readStats(games: list) -> dict:
       stats = [];
       for i in range(len(games)):
-        with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
+        with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file: # Opening settings/player.json
           data = json.load(file);
           if(data["username"] == self.usrn):
-            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1:
+            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: # Opening stats/score.json
               data1 = json.load(statsfile1);
 
-              with open("../database/" + str(games[i]) + "/stats/wave.json", "r") as statsfile2:
+              with open("../database/" + str(games[i]) + "/stats/wave.json", "r") as statsfile2: # Opening stats/wave.json
                 data2 = json.load(statsfile2);
-                stats.append({
+                stats.append({ # Creating a dicttionary for THIS game and appending it to the stats[] array. 
                   "score": data1["score"], 
                   "wave": data2["wave"],
                   "id": games[i]
                 });
+                # The format of the stats[] array is as follows:
+                # stats = [{
+                #   "score":,
+                #   "wave":,
+                #   "id":
+                #  },
+                #  {
+                #  ...
+                #  }
+                #];
       return stats;
 
 
-    for widget in self.window.winfo_children():
+    for widget in self.window.winfo_children(): # Destroying everything on the screen (so that it is blank).
       widget.destroy();
     
     self.backgroundDisplay();
@@ -79,11 +93,11 @@ class mainMenu:
     title = tk.Label(self.window, text = "Your Stats", font = tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
 
-    games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
+    games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/")); # Getting all the games owned by the user.
     stats = readStats(games);
-    stats = driverMethod(stats); # Merge sorting the AllScores list.
+    stats = driverMethod(stats); # Merge sorting the AllScores list. `driverMethod()` is the driver code that initialises the mergeSort algorithm.
     for i in range(len(stats)):
-      boop = tk.Label(
+      boop = tk.Label( # Stats for this game.
         self.window, 
         text = 
           str(i + 1) + 

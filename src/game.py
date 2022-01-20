@@ -192,7 +192,7 @@ class game():
     save(DBLoc, {"identifier": 1, "wave": self.wave}, "stats/wave.json");
     save(DBLoc, {"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save(DBLoc, {"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
-    save(DBLoc, {"identifier": 0, "username": self.usrn}, "settings/player.json");
+    save(DBLoc, {"identifier": 2, "username": self.usrn}, "settings/player.json");
 
     def backupToMongo():
       # Backing up to the MongoDB Atlas server.
@@ -207,6 +207,6 @@ class game():
       StatsCol.insert_one({"identifier": 1, "wave": self.wave});
       SettingsCol.insert_one({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]});
       SettingsCol.insert_one({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives});
-      SettingsCol.insert_one({"identifier": 0, "username": self.usrn});
+      SettingsCol.insert_one({"identifier": 2, "username": self.usrn});
 
     backupToMongo();
