@@ -17,7 +17,7 @@ class alien(pygame.sprite.Sprite):
     self.rect.center = (x, y);
     self.speed = 5;
 
-
+  # Pygame sprites come with a pre-built update() function, however it does not include certain operations that we need, so we'll rewrite it:
   def update(self, height):
     self.rect.centerx += self.speed;
     if(self.rect.right >= 600):
