@@ -6,6 +6,10 @@ import pygame;
 from explosion import explosion;
 #################################
 
+# Classes for the spaceship and alien bullets.
+# Since this will be a sprite, we inherit methods and attributes from the pygame.sprite.Sprite class.
+# This will make it easier to program features (such as movement) for the spaceship (and any other sprite) as Pygame will do most of the
+# "heavy lifting".
 class bullet(pygame.sprite.Sprite):
   def __init__(self, x, y) -> None:
     pygame.sprite.Sprite.__init__(self);
@@ -19,12 +23,14 @@ class bullet(pygame.sprite.Sprite):
     if(self.rect.bottom < 0): self.kill;
 
     if(pygame.sprite.spritecollide(self, AlienGroup, True)): # Checking if bullet has collided with aliens using pygame method.
-      NewExp = explosion(self.rect.centerx, self.rect.centery, 2);
+      NewExp = explosion(self.rect.centerx, self.rect.centery, 2); # Instantiating a new explosion.
       ExpGroup.add(NewExp);
 
-      self.kill();
+      self.kill(); # Destroying the bullet.
       self.HasHitAlien = True;
 
+# The same functionality is implemented in the alienBullet class, however the different is which direction they move in
+# and what happens if there is a collision.
 class alienBullet(pygame.sprite.Sprite):
   def __init__(self, x, y) -> None:
     pygame.sprite.Sprite.__init__(self);
@@ -36,11 +42,11 @@ class alienBullet(pygame.sprite.Sprite):
     self.rect.y += 2;
     if(self.rect.top > height): self.kill();
 
-    if(pygame.sprite.spritecollide(self, SpaceshipGroup, False)):
+    if(pygame.sprite.spritecollide(self, SpaceshipGroup, False)): # If collision, return true but dont destroy the spaceship.
       NewExp = explosion(self.rect.centerx, self.rect.centery, 1);
       ExpGroup.add(NewExp);
       self.kill();
-      if(ship.lives <= 0): ship.kill();
+      if(ship.lives <= 0): ship.kill(); # if the spaceship has no more lives left, kill it.
       else:
-        ship.lives -= 1;
+        ship.lives -= 1; # Else decrement the amount of lives that the ship has.
         print("yippie!1")

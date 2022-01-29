@@ -16,7 +16,7 @@ class loginMenu():
     return None;
 
   def thisHash(self, text: str) -> str:
-    SHAhash = hashes.new("sha512_256");
+    SHAhash = hashes.new("sha512");
     SHAhash.update(text.encode("latin1")); # Encoding the input message into unicode 8 and then hashing it.
     return SHAhash.hexdigest(); # Returns the hexadecimal version of the hash value.
 
@@ -79,7 +79,7 @@ class loginMenu():
     
     def execSignUp():
       usrn = self.UserInp.get(1.0, "end-1c");
-      pwd = self.hash(self.PwdInp.get(1.0, "end-1c"));
+      pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c"));
       self.res = self.signup(usrn, pwd);
       if(self.res["status"] == False):
         if(self.res["reason"] == "usrn_already_exists"): print("Username already exists");

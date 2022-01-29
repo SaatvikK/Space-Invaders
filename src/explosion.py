@@ -4,6 +4,10 @@ import pygame;
 import time;
 #################################
 
+# Class for the explosions.
+# Since this will be a sprite, we inherit methods and attributes from the pygame.sprite.Sprite class.
+# This will make it easier to program features (such as movement) for the spaceship (and any other sprite) as Pygame will do most of the
+# "heavy lifting".
 class explosion(pygame.sprite.Sprite):
   def __init__(self, x, y, size):
     pygame.sprite.Sprite.__init__(self);

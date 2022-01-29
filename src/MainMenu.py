@@ -11,11 +11,14 @@ import json;
 from mergesort import *; # Importing my merge sort algorithm
 #################################
 
+# Class for the main menu.
 class mainMenu:
   def __init__(self, IsDev, usrn) -> None:
     self.usrn = usrn;
     self.IsDev = IsDev;
     self.window = tk.Tk();
+
+    # Getting the width and height of the monitor using tkinter, so that the main menu can be dynamic.
     self.ScreenWidth, self.ScreenHeight = self.window.winfo_screenwidth(), self.window.winfo_screenheight();
     self.window.title("Space Invaders: Main Menu");
     self.window.iconbitmap(); #Icon for window
@@ -56,12 +59,14 @@ class mainMenu:
   
   def statsPage(self):
     # Getting the stats of each game that THIS player has played.
-    def readStats(games: list) -> dict:
+    def readStats(games: list) -> dict: # "games" is a list of GameIDs owned by the currently logged in user.
       stats = [];
-      for i in range(len(games)):
+      for i in range(len(games)): # Iterating through the list.
         with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file: # Opening settings/player.json
           data = json.load(file);
-          if(data["username"] == self.usrn):
+          if(data["username"] == self.usrn): # Checking if the game that is currently being looked at is owned by the user.
+
+            # If the game is owned bt the user, we grab the score and the wave number from the database:
             with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: # Opening stats/score.json
               data1 = json.load(statsfile1);
 
@@ -95,9 +100,14 @@ class mainMenu:
 
     games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/")); # Getting all the games owned by the user.
     stats = readStats(games);
-    stats = driverMethod(stats); # Merge sorting the AllScores list. `driverMethod()` is the driver code that initialises the mergeSort algorithm.
-    for i in range(len(stats)):
-      boop = tk.Label( # Stats for this game.
+
+    # Merge sorting the AllScores list. `driverMethod()` is the driver code that initialises the mergeSort algorithm.
+    # A merge sort was used over a bubble sort algorithm as it can complete a sort operation in O(n log n) time (worst case performance).
+    # This is far better than a bubble sort's O(n^2) time.
+    stats = driverMethod(stats);
+    for i in range(len(stats)): # Iterating through the newly-sorted stats list.
+      # Printing out the stats for the game.
+      boop = tk.Label(
         self.window, 
         text = 
           str(i + 1) + 
@@ -115,7 +125,7 @@ class mainMenu:
 
     return;
   
-  def newGame(self):
+  def newGame(self): # This method is called if the user clicks the "New Game" button.
     self.window.title("Space Invaders: New Game");
     # Destroy everything on the screen (i.e. the main menu)
     for widget in self.window.winfo_children():
@@ -139,12 +149,14 @@ class mainMenu:
     DiffMenu = tk.OptionMenu(self.window, difficulty, *["Hard", "Medium", "Easy", "Casual/Normal"]);
     DiffMenu.place(x = 50, y = 200);
 
-    def beginGame():
+    def beginGame(): # Executed when the user finishes adjusting the new game's settings and clicks "Create Game".
       self.type = "create";
       print("Beginning game", Lives.get())
       self.Lives = int(Lives.get());
       print(difficulty.get())
       self.difficulty = difficulty.get();
+      # Creating dictionaries of various cooldowns and thresholds for the player and aliens depending on what difficulty the user chose.
+      # This dictionary will be passed into the game object when it is created in `main.py`.
       if(difficulty.get() == "Hard"): self.cooldowns = {"alien": 100, "player": 1000, "AlienBulletsMax": 20};
       elif(difficulty.get() == "Medium"): self.cooldowns = {"alien": 300, "player": 500, "AlienBulletsMax": 7};
       elif(difficulty.get() == "Easy"): self.cooldowns = {"alien": 3000, "player": 100, "AlienBulletsMax": 3};
@@ -155,9 +167,7 @@ class mainMenu:
     SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
     SubmitButton.place(x = 5, y = 1000);
 
-    #print("hihihihihi", AmountPlayers.get())
-    #return int(AmountPlayers.get()[0]);
-
+  # This method returns all the games owned by the currently logged in user given a list of Game IDs.
   def checkIfGameOwnedByCurrentUser(self, games: list) -> list:
     OwnedGames = [];
     for i in range(len(games)):
@@ -167,7 +177,7 @@ class mainMenu:
           OwnedGames.append(games[i]);
     return OwnedGames;
 
-  def loadGame(self):
+  def loadGame(self): # Executed if the user clicks "Load Game" in the main menu.
     # opening load-game menu
     self.window.title("Space Invaders: Load a Game");
     # Destroy everything on the screen (i.e. the main menu)
@@ -175,6 +185,7 @@ class mainMenu:
       widget.destroy();
 
     self.backgroundDisplay();
+    # Getting all the games owned by the user so that they can be listed on the screen.
     games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
     
     ## Games
@@ -188,7 +199,8 @@ class mainMenu:
       self.type = "load";
       self.GameID = GamesDropDown.get();
       self.window.destroy();
-      
+    
+    # Once the user chooses a game, we load it from the latest saved state.
     SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
     SubmitButton.place(x = 5, y = 1000);
     
