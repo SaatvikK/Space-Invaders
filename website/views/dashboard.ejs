@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Importing various CSS files. CSS are files that add to the style of the page. -->
+    <style>
+      @import url("https://nea-website-al.thesatisback.repl.co/css/styles.css");
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
+      @import url("https://nea-website-al.thesatisback.repl.co/css/MainButtons.css");
+
+      table, th, td {
+        border:1px solid black;
+        font-family: 'Ubuntu', sans-serif;
+      }
+    </style>
+    <title>Saatvik Kambhampati</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico">
+  </head>
+
+  <body>
+    <div>
+      <!-- Buttons that appear on the top-left of almost all the pages. -->
+      <a href = "/leaderboard" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">Leaderboard</a>
+      <a href = "/dashboard" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">Dashboard</a>
+      <a href = "/logout" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">LOG OUT</a>
+      <a href = "/about" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">About</a>
+    </div>
+    <div>
+      <br/>
+      <h2><u><%= username %>'s Dashboard</u></h2> <!-- This is an example of embedded javascript. In index.js, when rendering this page,
+      The "username" key was passed into the object and now we are calling it so that it can be displayed here, embedded within the <h2> tag. -->
+      <!-- Creating a table to display all of the games that the player has played (in score-order).
+      Table rows are created with the <tr></tr> tags and the columns/cells are made with <td></td>. -->
+      <table style="width:20%;">
+        <tr>
+          <td><b><i>Rank</i></b></td>
+          <td><b><i>Game ID</i></b></td>
+          <td><b><i>Score</i></b></td>
+          <td><b><i>Difficulty</i></b></td>
+        </tr>
+        <% let RankCounter = 1; %>
+        <% for(let i = 0; i < data.length; i++) { %> <!-- Iterating through the data passed into the webpage by the back end. -->
+            <% if(data[i]["username"] == username) { %> <!-- Since `data` is a list of ALL existing games, a check must be ran to ensure the current game is owned by the player.-->
+              <!-- Displaying all the relevant information in the correct columns. -->
+              <td><b><%= RankCounter %></b></td>
+              <td><%= data[i]["GameID"] %></td>
+              <td><%= data[i]["score"] %></td>
+              <td><%= data[i]["difficulty"] %></td>
+            </tr>
+            <% RankCounter++; %>
+            <% } %>
+        <% } %>
+      </table>
+    </div>
+  </body>
+</html>

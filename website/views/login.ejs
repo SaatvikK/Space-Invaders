@@ -1,0 +1,35 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <title>Log In</title>
+  </head>
+  <!-- Importing various CSS files. CSS are files that add to the style of the page. -->
+  <style>
+    @import url("https://nea-website-al.thesatisback.repl.co/css/styles.css");
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
+    @import url("https://nea-website-al.thesatisback.repl.co/css/MainButtons.css");
+    
+    table, th, td {
+      border:1px solid black;
+      font-family: 'Ubuntu', sans-serif;
+    }
+  </style>
+
+  <body>
+    <!-- Link to the about page, since that is a public page. -->
+    <a href = "/about" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">About</a>
+    <h1>Login</h1>
+    <!-- Creating a form so that the user can input their username and password.
+    Notice that the "name" identifiers in the input tags are the same as the ones referenced in index.js.
+    This is how we identify data being passed from frontend to backend.
+  
+    The method of the form is also set to "POST" and the action to "/login", to signify that it is a POST method actioned by the "login" page. -->
+    <form action = "/login" method = "POST">
+      Username: <input type = "text" name = "LogInUsername"> <br/>
+      Password: <input type = "text" name = "LogInPassword"> <br/>
+      <input type = "submit">
+    </form>
+    <br/>
+    <a href = "/register">Register here!</a> <!-- Linking the "register" page.-->
+  </body>
+</html>
