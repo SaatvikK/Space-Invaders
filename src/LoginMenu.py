@@ -17,7 +17,7 @@ class loginMenu():
 
   def thisHash(self, text: str) -> str:
     SHAhash = hashes.new("sha512_256");
-    SHAhash.update(text.encode("utf-8")); # Encoding the input message into unicode 8 and then hashing it.
+    SHAhash.update(text.encode("latin1")); # Encoding the input message into unicode 8 and then hashing it.
     return SHAhash.hexdigest(); # Returns the hexadecimal version of the hash value.
 
   def login(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
