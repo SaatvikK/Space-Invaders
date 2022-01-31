@@ -141,40 +141,70 @@ class game():
 
       pygame.display.update();
     pygame.quit();
+   
+  def corruptionHandler(result: dict) -> dict:
+    print("Corruption detected in game database:", self.GameID);
+    fix = input("Would you like to download the backed-up files in order to resolve the corruption? You may lose some progress. [yes/no]: ").lower();
+    if(fix == "yes"):
+      stuff = env.dotenv_values(".env"); # Getting the MongoDB username and password.
+      MongoPwd = stuff["MONGO_PWD"];
+      client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+      db = client[str(self.GameID)];
+      StatsCol, SettingsCol = db["stats"], db["settings"];
+      stats = StatsCol.find()
+      settings = SettingsCol.find();
+      
+    else: return {"result": False, "reason": "User interrupt."};
   
   def load(self, GameID): # This function is executed in Main.executeGame() when a pre-existing game is being loaded.
     self.GameID = GameID;
     print("id", self.GameID);
     
-    def loadStats(): # Loading the stats from the database.
+    def loadStats() -> dict: # Loading the stats from the database.
       with open("../database/" + str(self.GameID) + "/stats/score.json", "r") as file:
         data = json.load(file);
+        if(isinstance(data["score"], int) == False): return {"IsCorrupted": True, "where": "score is not an int."};
         self.score = data["score"];
         print("score", self.score)
       
       with open("../database/" + str(self.GameID) + "/stats/wave.json", "r") as file:
         data = json.load(file);
+        if(isinstance(data["wave"], int) == False): return {"IsCorrupted": True, "where": "wave is not an int."};
         self.wave = data["wave"];
         print("wave", self.wave)
+      
+      return {"IsCorrupted": False};
     
-    def loadSettings(): # Loading the settings (eg difficulty) from the database.
+    def loadSettings() -> dict: # Loading the settings (eg difficulty) from the database.
       with open("../database/" + str(self.GameID) + "/settings/difficulty.json") as file:
         data = json.load(file);
+        if(isinstance(data["difficulty"], str) == False): return {"IsCorrupted": True, "where": "difficulty is not a string"};
+        elif(data["difficulty"] not in ["Hard", "Medium", "Easy", "Normal/Casual"]): return {"IsCorrupted": True, "where": "difficulty is not a valid difficulty."};
         self.difficulty = data["difficulty"];
-        print("diff", self.difficulty)
+        
+        if(isinstance(data["AlienCooldown"], int) == False): return {"IsCorrupted": True, "where": "AlienCooldown is not an int."};
         self.AlienBulletCooldown["time"] = data["AlienCooldown"];
-        print("alien cooldown", self.AlienBulletCooldown["time"])
+        
+        if(isinstance(data["PlayerCooldown"], int) == False): return {"IsCorrupted": True, "where": "PlayerCooldown is not an int."};
         self.ThisSpaceship.BulletCooldown["time"] = data["PlayerCooldown"];
-        print("ship cooldown", self.ThisSpaceship.BulletCooldown["time"])
+        
+        if(isinstance(data["AlienBulletsMax"], int) == False): return {"IsCorrupted": True, "where": "AlienBulletsMax is not an int."};
+        elif(data["AlienBulletsMax"] > 0): return {"IsCorrupted": True, "where": "AlienBulletsMax is greater than 0."}
         self.cooldowns["AlienBulletsMax"] = data["AlienBulletsMax"];
-        print("Max bullets", self.cooldowns["AlienBulletsMax"]);
       
       with open("../database/" + str(self.GameID) + "/settings/lives.json") as file:
         data = json.load(file);
+        if(isinstance(data["LivesRemaining"], int) == False): return {"IsCorrupted": True, "where": "AlienBulletsMax is not an int."};
+        elif(data["LivesRemaining"] < 0 or data["LivesRemaining"] > data["TotalLives"]): return {"IsCorrupted": True, "where": "LivesRemaining is less than 0 or greater than TotalLives"};
         self.ThisSpaceship.lives = data["LivesRemaining"];
+        if(isinstance(data["TotalLives"], int) == False): return {"IsCorrupted": True, "where": "TotalLives is not an int."};
         self.ThisSpaceship.TotalLives = data["TotalLives"];
-
-    loadStats(); loadSettings();
+    
+      return {"IsCorrupted": False};
+  
+    res = loadStats(); res2 = loadSettings();
+    if(res["IsCorrupted"] == True): self.corruptionHandler(res);
+    elif(res2["IsCorrupted"] == True): self.corruptionHandler(res2);
     
   def saveGame(self): # This function is executed in Main.executeGame() when a new game is being created and when the user quits a game that they are playing.
     def makeDB() -> str: # First, a check is done to make sure that the database folder ("../database/") exists and a database for THIS GAME ("../database/GameID/").
