@@ -142,18 +142,34 @@ class game():
       pygame.display.update();
     pygame.quit();
    
-  def corruptionHandler(result: dict) -> dict:
-    print("Corruption detected in game database:", self.GameID);
-    fix = input("Would you like to download the backed-up files in order to resolve the corruption? You may lose some progress. [yes/no]: ").lower();
-    if(fix == "yes"):
+  def corruptionHandler(self, result: dict) -> dict:
+    def loadBackup(DictToSave: dict, collection: str):
+      try:
+        with open(self.DBLoc + collection, "w+") as file:
+          json.dump(DictToSave, file);
+      
+      except Exception as e: print("uh oh lol"); print(e);
+    
+    def commitBackup():
       stuff = env.dotenv_values(".env"); # Getting the MongoDB username and password.
       MongoPwd = stuff["MONGO_PWD"];
       client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
       db = client[str(self.GameID)];
       StatsCol, SettingsCol = db["stats"], db["settings"];
-      stats = StatsCol.find()
-      settings = SettingsCol.find();
-      
+      score, wave = StatsCol.find({"identifier": 0}), StatsCol.find({"identifier": 1})
+      GeneralSettings = SettingsCol.find({"identifier": 0}); # Difficulty, cooldowns, max bullets for aliens.
+      LivesSettings = SettingsCol.find({"identifier": 0}); # TotalLives, LivesRemaining.
+      loadBackup({"identifier": 0, "score": score}, "stats/score.json");
+      loadBackup({"identifier": 1, "wave": wave}, "stats/wave.json");
+      loadBackup({"identifier": 0, "difficulty": GeneralSettings["difficulty"], "AlienCooldown": GeneralSettings["AlienCooldown"], "PlayerCooldown": GeneralSettings["PlayerCooldown"], "AlienBulletsMax": GeneralSettings["AlienBulletsMax"]}, "settings/difficulty.json");
+      loadBackup({"identifier": 1, "LivesRemaining": LivesSettings["LivesRemaining"], "TotalLives": LivesSettings["TotalLives"]}, "settings/lives.json");
+      loadBackup({"identifier": 2, "username": self.usrn}, "settings/player.json");
+
+    print("Corruption detected in game database:", self.GameID);
+    fix = input("Would you like to download the backed-up files in order to resolve the corruption? You may lose some progress. [yes/no]: ").lower();
+    if(fix == "yes"):      
+      commitBackup();
+      return {"result": True};
     else: return {"result": False, "reason": "User interrupt."};
   
   def load(self, GameID): # This function is executed in Main.executeGame() when a pre-existing game is being loaded.
@@ -203,8 +219,11 @@ class game():
       return {"IsCorrupted": False};
   
     res = loadStats(); res2 = loadSettings();
-    if(res["IsCorrupted"] == True): self.corruptionHandler(res);
-    elif(res2["IsCorrupted"] == True): self.corruptionHandler(res2);
+    resolve = None;
+    if(res["IsCorrupted"] == True): resolve = self.corruptionHandler(res);
+    elif(res2["IsCorrupted"] == True): resolve = self.corruptionHandler(res2);
+    if(resolve["result"] == True): print("Corruption resolved.");
+    else: print("Corruption handler could not resolve corruption issues. Sorry for your loss.")
     
   def saveGame(self): # This function is executed in Main.executeGame() when a new game is being created and when the user quits a game that they are playing.
     def makeDB() -> str: # First, a check is done to make sure that the database folder ("../database/") exists and a database for THIS GAME ("../database/GameID/").
@@ -217,20 +236,20 @@ class game():
 
       return DBLoc;
 
-    def save(DBLoc: str, DictToSave: dict, collection: str):
+    def save(DictToSave: dict, collection: str):
       try:
-        with open(DBLoc + collection, "w+") as file:
+        with open(self.DBLoc + collection, "w+") as file:
           json.dump(DictToSave, file);
       
       except Exception as e: print("uh oh lol"); print(e);
     
-    DBLoc = makeDB();
+    self.DBLoc = makeDB();
     # Saving the current game state.
-    save(DBLoc, {"identifier": 0, "score": self.score}, "stats/score.json");
-    save(DBLoc, {"identifier": 1, "wave": self.wave}, "stats/wave.json");
-    save(DBLoc, {"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
-    save(DBLoc, {"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
-    save(DBLoc, {"identifier": 2, "username": self.usrn}, "settings/player.json");
+    save({"identifier": 0, "score": self.score}, "stats/score.json");
+    save({"identifier": 1, "wave": self.wave}, "stats/wave.json");
+    save({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
+    save({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
+    save({"identifier": 2, "username": self.usrn}, "settings/player.json");
 
     def backupToMongo():
       # Backing up to the MongoDB Atlas server.
