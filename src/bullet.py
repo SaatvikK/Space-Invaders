@@ -1,6 +1,7 @@
 ############ IMPORTS ############
 # Libraries
 import pygame;
+import json;
 
 # Other Classes
 from explosion import explosion;
@@ -17,6 +18,7 @@ class bullet(pygame.sprite.Sprite):
     self.rect = self.image.get_rect();
     self.rect.center = (x, y);
     self.HasHitAlien = False;
+    self.scoreBul = 0;
   
   def update(self, AlienGroup, score, ExpGroup):
     self.rect.y -= 5;
@@ -25,9 +27,12 @@ class bullet(pygame.sprite.Sprite):
     if(pygame.sprite.spritecollide(self, AlienGroup, True)): # Checking if bullet has collided with aliens using pygame method.
       NewExp = explosion(self.rect.centerx, self.rect.centery, 2); # Instantiating a new explosion.
       ExpGroup.add(NewExp);
-
-      self.kill(); # Destroying the bullet.
+      self.scoreBul = score + 1;
       self.HasHitAlien = True;
+      self.kill(); # Destroying the bullet.
+      with open("../scorestore.json", "w") as f:
+        json.dump({"score": score + 1}, f);
+
 
 # The same functionality is implemented in the alienBullet class, however the different is which direction they move in
 # and what happens if there is a collision.

@@ -135,8 +135,15 @@ class game():
         self.AlienBulletGroup.add(Attacker.NewBullet); # Add the newly made bullet to the relevent group.
         self.AlienBulletCooldown["TimeOfLastCooldownStart"] = int(time.time()*1000); # milliseconds
 
+      #try: 
+      #  if(self.NewBullet.HasHitAlien == True): 
+      #    print("Hit alien:", self.score)
+      #    self.score += 1; self.NewBullet.HasHitAlien = False;
+      #except: pass;
+      
       try: 
-        if(self.NewBullet.HasHitAlien == True): self.score += 1; self.NewBullet.HasHitAlien = False;
+        with open("../scorestore.json", "r") as file: self.score = json.load(file)["score"];
+        with open("../scorestore.json", "w") as file: os.remove("../scorestore.json");
       except: pass;
 
       pygame.display.update();
