@@ -86,6 +86,7 @@ class game():
 
   def waveHandler(self): # If all aliens have been killed, start the next wave (increment wave counter --> execute game.makeAliens() again).
     font = pygame.font.SysFont("Constantia", 30);
+    print(font)
     img = font.render("Wave: " + str(self.wave), True, (255, 255, 255));
     self.screen.blit(img, (0, 50));
     if(len(self.AliensGroup.sprites()) <= 0): 

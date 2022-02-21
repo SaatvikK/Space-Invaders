@@ -95,10 +95,19 @@ class loginMenu():
       SignUp = tk.Button(self.window, text = "Sign Up", command = lambda: execSignUp(), height = 1, width = 10, font = self.ButtonFont);
       SignUp.place(x = self.ScreenWidth/2 - 400, y = self.ScreenHeight/2 + 400);
       
-      #Text-boxes
+      #Text-boxes --------------------------------------
+      # Inputs
       self.UserInp = tk.Text(self.window, height = 5, width = 20);
       self.PwdInp = tk.Text(self.window, height = 5, width = 20);
+
+      # Label Texts
+      UserText = tk.Label(self.window, text = "Username:", font = tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+      PwdText = tk.Label(self.window, text = "Password:", font = tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+      
+      # Placing the labels and input boxes on the screen
+      UserText.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 - 140);
       self.UserInp.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 - 100);
+      PwdText.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 60);
       self.PwdInp.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 100);
     backgroundDisplay();
     menuButtons();
