@@ -203,7 +203,7 @@ class game():
       with open("../database/" + str(self.GameID) + "/settings/difficulty.json") as file:
         data = json.load(file);
         if(isinstance(data["difficulty"], str) == False): return {"IsCorrupted": True, "where": "difficulty is not a string"};
-        elif(data["difficulty"] not in ["Hard", "Medium", "Easy", "Normal/Casual"]): return {"IsCorrupted": True, "where": "difficulty is not a valid difficulty."};
+        elif(data["difficulty"] not in ["Hard", "Medium", "Easy", "Casual/Normal"]): return {"IsCorrupted": True, "where": "difficulty is not a valid difficulty."};
         self.difficulty = data["difficulty"];
         
         if(isinstance(data["AlienCooldown"], int) == False): return {"IsCorrupted": True, "where": "AlienCooldown is not an int."};
@@ -213,7 +213,7 @@ class game():
         self.ThisSpaceship.BulletCooldown["time"] = data["PlayerCooldown"];
         
         if(isinstance(data["AlienBulletsMax"], int) == False): return {"IsCorrupted": True, "where": "AlienBulletsMax is not an int."};
-        elif(data["AlienBulletsMax"] > 0): return {"IsCorrupted": True, "where": "AlienBulletsMax is greater than 0."}
+        elif(data["AlienBulletsMax"] < 0): return {"IsCorrupted": True, "where": "AlienBulletsMax is less than 0."}
         self.cooldowns["AlienBulletsMax"] = data["AlienBulletsMax"];
       
       with open("../database/" + str(self.GameID) + "/settings/lives.json") as file:
@@ -227,9 +227,11 @@ class game():
       return {"IsCorrupted": False};
   
     res = loadStats(); res2 = loadSettings();
-    resolve = None;
+    resolve = {};
+    print(res2)
     if(res["IsCorrupted"] == True): resolve = self.corruptionHandler(res);
     elif(res2["IsCorrupted"] == True): resolve = self.corruptionHandler(res2);
+    if(res["IsCorrupted"] == False and res["IsCorrupted"] == False): return;
     if(resolve["result"] == True): print("Corruption resolved.");
     else: print("Corruption handler could not resolve corruption issues. Sorry for your loss.")
     
