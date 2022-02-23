@@ -35,6 +35,7 @@ class Main():
       newgame.GameID = newgame.generateGameID();
       newgame.createSprites();
       newgame.makeAliens();
+      newgame.makeBarriers();
       newgame.saveGame();
       newgame.gameLoop();
 
@@ -43,6 +44,7 @@ class Main():
       newgame.createSprites();
       newgame.load(newmenu.GameID); # Loading the game.
       newgame.makeAliens();
+      newgame.makeBarriers();
       newgame.saveGame();
       newgame.gameLoop();
 

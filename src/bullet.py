@@ -32,6 +32,7 @@ class bullet(pygame.sprite.Sprite):
       self.kill(); # Destroying the bullet.
       with open("../scorestore.json", "w") as f:
         json.dump({"score": score + 1}, f);
+    #elif(pygame.sprite.spritecollide(self, BarrierGroup, False)): self.kill();
 
 
 # The same functionality is implemented in the alienBullet class, however the different is which direction they move in
@@ -55,3 +56,5 @@ class alienBullet(pygame.sprite.Sprite):
       else:
         ship.lives -= 1; # Else decrement the amount of lives that the ship has.
         print("yippie!1")
+    
+    #elif(pygame.sprite.spritecollide(self, BarrierGroup, False)): self.kill();

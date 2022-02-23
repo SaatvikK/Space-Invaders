@@ -11,6 +11,7 @@ import dotenv as env;
 # Other classes
 from spaceship import spaceShip;
 from aliens import alien;
+from barrier import Barrier;
 #################################
 
 # Class for the game object.
@@ -61,7 +62,16 @@ class game():
     self.ThisSpaceship = spaceShip(self.WinWidth//2, self.WinHeight - 100, self.SpaceshipLives, self.cooldowns["player"]);
     self.SpaceshipGroup.add(self.ThisSpaceship);
     self.ExplosionGroup = pygame.sprite.Group();
+    self.BarrierGroup = pygame.sprite.Group();
   
+  def makeBarriers(self):
+    Barrier1 = Barrier(self.WinWidth//2 - 200, self.WinHeight//2 + 50); 
+    Barrier2 = Barrier(self.WinWidth//2, self.WinHeight//2 + 50);
+    Barrier3 = Barrier(self.WinWidth//2 + 200, self.WinHeight//2 + 50);
+    self.BarrierGroup.add(Barrier1);
+    self.BarrierGroup.add(Barrier2);
+    self.BarrierGroup.add(Barrier3);
+
   def makeAliens(self):
     if(self.wave != 1):
       if(self.wave <= 5): 
@@ -86,7 +96,6 @@ class game():
 
   def waveHandler(self): # If all aliens have been killed, start the next wave (increment wave counter --> execute game.makeAliens() again).
     font = pygame.font.SysFont("Constantia", 30);
-    print(font)
     img = font.render("Wave: " + str(self.wave), True, (255, 255, 255));
     self.screen.blit(img, (0, 50));
     if(len(self.AliensGroup.sprites()) <= 0): 
@@ -113,9 +122,11 @@ class game():
       self.AliensGroup.draw(self.screen);
       self.AlienBulletGroup.draw(self.screen);
       self.ExplosionGroup.draw(self.screen);
+      self.BarrierGroup.draw(self.screen);
 
       # Calling the update function for every single sprite.
       self.ExplosionGroup.update();
+      self.BarrierGroup.update(self.BulletGroup, self.AlienBulletGroup);
       self.BulletGroup.update(self.AliensGroup, self.score, self.ExplosionGroup);
       self.AliensGroup.update(self.WinHeight);
       self.AlienBulletGroup.update(self.WinHeight, self.SpaceshipGroup, self.ThisSpaceship, self.ExplosionGroup);
