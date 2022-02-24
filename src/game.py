@@ -7,6 +7,7 @@ import os;
 import time;
 import pymongo as mongo;
 import dotenv as env;
+import requests as req;
 
 # Other classes
 from spaceship import spaceShip;
@@ -146,12 +147,6 @@ class game():
       if(st == True):  # If the shoot was successful (i.e. if the cooldown was 0)
         self.AlienBulletGroup.add(Attacker.NewBullet); # Add the newly made bullet to the relevent group.
         self.AlienBulletCooldown["TimeOfLastCooldownStart"] = int(time.time()*1000); # milliseconds
-
-      #try: 
-      #  if(self.NewBullet.HasHitAlien == True): 
-      #    print("Hit alien:", self.score)
-      #    self.score += 1; self.NewBullet.HasHitAlien = False;
-      #except: pass;
       
       try: 
         with open("../scorestore.json", "r") as file: self.score = json.load(file)["score"];
@@ -214,21 +209,24 @@ class game():
     save({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
     save({"identifier": 2, "username": self.usrn}, "settings/player.json");
 
-    def backupToMongo():
-      # Backing up to the MongoDB Atlas server.
-      # MongoDB is a cloud computing company that hosts various NoSQL database servers.
-      # The local DB is being backed up to MongoDB Atlas incase the local DB is corrupted and to allow the website to get data from all the different games.
-      stuff = env.dotenv_values(".env"); # Getting the MongoDB username and password.
-      MongoPwd = stuff["MONGO_PWD"];
-      client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-      db = client[str(self.GameID)];
-      StatsCol, SettingsCol = db["stats"], db["settings"];
-      db.drop_collection("stats");
-      db.drop_collection("settings");
-      StatsCol.insert_one({"identifier": 0, "score": self.score});
-      StatsCol.insert_one({"identifier": 1, "wave": self.wave});
-      SettingsCol.insert_one({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]});
-      SettingsCol.insert_one({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives});
-      SettingsCol.insert_one({"identifier": 2, "username": self.usrn});
+    def backupToCloud():
+      BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/";
+      DoesGameExist = req.get(BaseURL + str(self.GameID)).json();
+      if(DoesGameExist["DoesGameExist"] == False):
+        user = list(self.usrn);
+        for i in range(len(user)):
+          if(user[i] == " "): user[i] = "%20";
+        self.usrn = "".join(user);
+        req.post(BaseURL + str(self.GameID) + "/" + self.usrn);
+      
+      # Back up stats
+      req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
+      req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
+      
+      # Back up settings
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
+      if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
+      else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
 
-    backupToMongo();
+    backupToCloud();
