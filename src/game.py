@@ -203,27 +203,35 @@ class game():
     
     self.DBLoc = makeDB();
     # Saving the current game state.
-    save({"identifier": 0, "score": self.score}, "stats/score.json");
-    save({"identifier": 1, "wave": self.wave}, "stats/wave.json");
-    save({"identifier": 0, "difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
-    save({"identifier": 1, "LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
-    save({"identifier": 2, "username": self.usrn}, "settings/player.json");
+    save({"score": self.score}, "stats/score.json");
+    save({"wave": self.wave}, "stats/wave.json");
+    save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
+    save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
+    save({"username": self.usrn}, "settings/player.json");
 
     def backupToCloud():
+      # This is where the REST API is used.
+      # A REST API is used to inteface with the database server on replit.com.
+      # First, the base URL is defined:
       BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/";
+
+      # Next, a request is made with the GET HTTP method using the the url: `https://www.domain.com/NEA_API/v1/[GameID]`,
       DoesGameExist = req.get(BaseURL + str(self.GameID)).json();
-      if(DoesGameExist["DoesGameExist"] == False):
+      if(DoesGameExist["DoesGameExist"] == False): # The server will response with a JSON and a boolean value. If the value is false, the game's database DOES NOT exist in the database server.
+        # Because it doesn't exist, it must first be made using a POST http method.
+        # The following subroutine replaces all white spaces in the username with `%20`. This is done as a URL cannot have white-spaces and so %20 represents a space.
         user = list(self.usrn);
         for i in range(len(user)):
           if(user[i] == " "): user[i] = "%20";
         self.usrn = "".join(user);
-        req.post(BaseURL + str(self.GameID) + "/" + self.usrn);
+
+        req.post(BaseURL + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
       
-      # Back up stats
+      # Back up stats collection using a PUT method
       req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
       req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
       
-      # Back up settings
+      # Back up settings collection using a PUT method.
       req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
       req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
       if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
