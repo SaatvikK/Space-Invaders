@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Importing various CSS files. CSS are files that add to the style of the page. -->
+    <style>
+      @import url("https://nea-website-al.thesatisback.repl.co/css/styles.css");
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
+      @import url("https://nea-website-al.thesatisback.repl.co/css/MainButtons.css");
+
+      table, th, td {
+        border:1px solid black;
+        font-family: 'Ubuntu', sans-serif;
+      }
+    </style>
+    <title>Saatvik Kambhampati</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.ico">
+  </head>
+
+  <body>
+    <div>
+      <a href = "/about" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">About</a>
+    </div>
+    <div>
+      <br/>
+      <h2><u>GitHub Repo</u></h2>
+      <p>This is the GitHub repository for this NEA.</p>
+      <p> It can be found <a href = "https://github.com/SaatvikK/Space-Invaders" target="_blank" rel="noopener noreferrer">here</a>.</p>
+      <!-- The above <a></a> tag is very important for security reasons. The "target='_blank'" attribute tells the web browser to open the 
+      href link in a new tab. However, this causes a security vulnerability that can be exploited using the "Reverse Tabnabbing" technique.
+      For example, say there are two websites (A (the one with the vulnerability) and B) and a user. The user is browsing website A and clicks 
+      a link to website B. Website B opens in a new tab and website A and B are now linked using an "opener" and B can gain partial access to A 
+      using the `window.object` object. This allows B to redirect the tab that A is opened in to a new, possibly malicious website. The malicious website
+      will look like website A, and will ask the user to enter credentials. This is an example of phishing. Because the user's focus is on the newly opened tab,
+      they may not notice the original tab being redirected to the malicious website. -
+      
+      This vulnerability can easily be rectified using the `rel = "noopener noreferrer"` attribute. This tells the browser to open the new link WITHOUT 
+      giving the new website/tab access to the previous one. -->
+    </div>
+  </body>
+</html>

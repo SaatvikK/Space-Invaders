@@ -23,6 +23,7 @@
       <a href = "/dashboard" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">Dashboard</a>
       <a href = "/logout" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">LOG OUT</a>
       <a href = "/about" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">About</a>
+      <a href = "/download" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">GitHub Repo</a>
     </div>
     <div>
       <br/>
@@ -39,7 +40,7 @@
         </tr>
         <% let RankCounter = 1; %>
         <% for(let i = 0; i < data.length; i++) { %> <!-- Iterating through the data passed into the webpage by the back end. -->
-            <% if(data[i]["username"] == username) { %> <!-- Since `data` is a list of ALL existing games, a check must be ran to ensure the current game is owned by the player.-->
+            <% if(data[i]["usrn"] == username) { %> <!-- Since `data` is a list of ALL existing games, a check must be ran to ensure the current game is owned by the player.-->
               <!-- Displaying all the relevant information in the correct columns. -->
               <td><b><%= RankCounter %></b></td>
               <td><%= data[i]["GameID"] %></td>
