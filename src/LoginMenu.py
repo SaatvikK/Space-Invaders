@@ -32,10 +32,11 @@ class loginMenu():
   def signup(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
     BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/"; # BaseURL of the API.
     
-    LoginAttempt = req.get(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
+    LoginAttempt = req.post(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
     # We can just return the result of this get request as we handle all the account verification and validation on the server side.
     # The server side checks if the two usernames and passwords are the same. If so, it responds success. Else, failure.
-    
+    print(LoginAttempt)
+    print("----------")
     if(LoginAttempt["reason"] == "Password incorrect."):
       res = req.post(BaseURL + "/users/" + usrn + "/" + pwd).json();
       return res;
@@ -57,22 +58,22 @@ class loginMenu():
     def execLogin():
       print("HIHIHII")
       usrn = self.UserInp.get(1.0, "end-1c"); # Getting the username from the text-box input.
-      pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c")); # Getting the password from the text-box input.
+      pwd = self.PwdInp.get(1.0, "end-1c"); # Getting the password from the text-box input.
       self.res = self.login(usrn, pwd);
       if(self.res["result"] == True):
-          print(self.res)
-          self.window.destroy();
+        self.res["usrn"] = usrn # Adding the username to the result dictionary so that it can be read in Main.main().
+        print(self.res)
+        self.window.destroy();
       else:
         print(self.res);
       return;
     
     def execSignUp():
       usrn = self.UserInp.get(1.0, "end-1c");
-      pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c"));
+      pwd = self.PwdInp.get(1.0, "end-1c");
       self.res = self.signup(usrn, pwd);
-      if(self.res["error"] == None):
-        if(self.res["status"] == False): print(self.res);
-        elif(self.res["status"] == True): print("Account created. Please login.");
+      if(self.res["result"] == False): print(self.res);
+      elif(self.res["result"] == True): print("Account created. Please login.");
       return;
     
     def menuButtons():

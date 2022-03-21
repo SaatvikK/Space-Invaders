@@ -207,7 +207,7 @@ class game():
     save({"wave": self.wave}, "stats/wave.json");
     save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
-    save({"username": self.usrn}, "settings/player.json");
+    save({"username": self.usrn}, "settings/user.json");
 
     def backupToCloud():
       # The following subroutine replaces all white spaces in the username with `%20`. This is done as a URL cannot have white-spaces and so %20 represents a space.
@@ -221,16 +221,16 @@ class game():
       # This is where the REST API is used.
       # A REST API is used to inteface with the database server on replit.com.
       # First, the base URL is defined:
-      BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/";
+      BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1";
 
       # Next, a request is made with the GET HTTP method using the the url: `https://www.domain.com/NEA_API/v1/[GameID]`,
-      DoesGameExist = req.get(BaseURL + str(self.GameID)).json();
+      DoesGameExist = req.get(BaseURL + "/" + str(self.GameID)).json();
       if(DoesGameExist["DoesGameExist"] == False): # The server will response with a JSON and a boolean value. If the value is false, the game's database DOES NOT exist in the database server.
         # Because it doesn't exist, it must first be made using a POST http method.
         
         self.usrn = spacesWith20(self.usrn);
 
-        req.post(BaseURL + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
+        req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
       
       # Back up stats collection using a PUT method
       req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));

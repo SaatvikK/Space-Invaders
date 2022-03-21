@@ -19,7 +19,7 @@ class Main():
     
     newlogin = loginMenu(); # Instantiate a new login menu.
     newlogin.menu(); # Execute the menu method to display the login menu.
-    if(newlogin.res["status"] == True): # `newlogin.res` is a dictionary that holds two key-value pairs: 1. The status of the last attempted login (boolean); 2. The reason of the failed login (usrname/pwd wrong or a server error).
+    if(newlogin.res["result"] == True): # `newlogin.res` is a dictionary that holds two key-value pairs: 1. The status of the last attempted login (boolean); 2. The reason of the failed login (usrname/pwd wrong or a server error).
       self.executeGame(newlogin.res["usrn"]); # Execute the game if the login attempt was successful. We pass in the username into the game object.
       exit();
     
