@@ -97,7 +97,7 @@ class game():
 
   def waveHandler(self): # If all aliens have been killed, start the next wave (increment wave counter --> execute game.makeAliens() again).
     font = pygame.font.SysFont("Constantia", 30);
-    img = font.render("Wave: " + str(self.wave), True, (255, 255, 255));
+    img = self.font.render("Wave: " + str(self.wave), True, (255, 255, 255));
     self.screen.blit(img, (0, 50));
     if(len(self.AliensGroup.sprites()) <= 0): 
       self.wave += 1;
@@ -199,17 +199,25 @@ class game():
         with open(self.DBLoc + collection, "w+") as file:
           json.dump(DictToSave, file);
       
-      except Exception as e: print("uh oh lol"); print(e);
+      except Exception as e: print(e);
     
     self.DBLoc = makeDB();
     # Saving the current game state.
-    save({"score": self.score}, "stats/score.json");
+    save({"value": self.score}, "stats/score.json");
     save({"wave": self.wave}, "stats/wave.json");
     save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
     save({"username": self.usrn}, "settings/player.json");
 
     def backupToCloud():
+      # The following subroutine replaces all white spaces in the username with `%20`. This is done as a URL cannot have white-spaces and so %20 represents a space.
+      def spacesWith20(usrn):
+        user = list(usrn);
+        for i in range(len(user)):
+          if(user[i] == " "): user[i] = "%20";
+        usrn = "".join(user);
+        return usrn;
+
       # This is where the REST API is used.
       # A REST API is used to inteface with the database server on replit.com.
       # First, the base URL is defined:
@@ -219,11 +227,8 @@ class game():
       DoesGameExist = req.get(BaseURL + str(self.GameID)).json();
       if(DoesGameExist["DoesGameExist"] == False): # The server will response with a JSON and a boolean value. If the value is false, the game's database DOES NOT exist in the database server.
         # Because it doesn't exist, it must first be made using a POST http method.
-        # The following subroutine replaces all white spaces in the username with `%20`. This is done as a URL cannot have white-spaces and so %20 represents a space.
-        user = list(self.usrn);
-        for i in range(len(user)):
-          if(user[i] == " "): user[i] = "%20";
-        self.usrn = "".join(user);
+        
+        self.usrn = spacesWith20(self.usrn);
 
         req.post(BaseURL + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
       

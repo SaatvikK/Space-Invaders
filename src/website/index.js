@@ -39,6 +39,13 @@ app.listen(port, function() {
 
 const CurrentUsers = {}; // Dictionary of currently logged-in clients.
 const errors = {};
+
+function spacesWith20(UsernameSpaces) {
+  const arr = [...UsernameSpaces];
+  for(let i = 0; i < arr.length; i++) if(arr[i] == " ") arr[i] = "%20"
+  return arr.join();
+}
+
 // Here the GET method is being used to render `leaderboard.ejs` onto the webpage.
 app.get("/leaderboard", function(req, res) {
   if(Object.keys(CurrentUsers).includes(req.sessionID)) // If the current client has successfully logged in.
