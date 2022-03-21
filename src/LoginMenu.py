@@ -9,6 +9,7 @@ import tkinter as tk;
 from tkinter import *;
 from tkinter import font as tkFont;
 import hashlib as hashes;
+import requests as req;
 #################################
 
 class loginMenu():
@@ -21,36 +22,25 @@ class loginMenu():
     return SHAhash.hexdigest(); # Returns the hexadecimal version of the hash value.
 
   def login(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
-    # Login to MongoDB
-    stuff = env.dotenv_values(".env"); # Getting the MongoDB login details from the .env file.
-    MongoPwd = stuff["MONGO_PWD"];
-    client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
+    BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/"; # BaseURL of the API.
     
-    # Accessing database and collection.
-    db = client["login"];
-    users = db.list_collection_names();
-    if(usrn not in users): # Check if the inputted username is one of the collection names (collection names = usernames).
-      return {"status": False, "reason": "usrn"};
-    else:
-      ThisCollection = db[users[users.index(usrn)]];
-      RealPwd = ThisCollection.find_one({"username": usrn})["pwd"]; # Getting the actual password of the account (the one stored in the DB).
-
-      if(pwd != RealPwd): return {"status": False, "reason": "pwd"}; # Checking it with the inputted password.
-      else: return {"status": True, "usrn": usrn};
+    LoginAttempt = req.get(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
+    # We can just return the result of this get request as we handle all the account verification and validation on the server side.
+    # The server side checks if the two usernames and passwords are the same. If so, it responds success. Else, failure.
+    return LoginAttempt;
 
   def signup(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
-    # Login to MongoDB
-    stuff = env.dotenv_values(".env"); # Getting the MongoDB login details from the .env file.
-    MongoPwd = stuff["MONGO_PWD"];
-    client = mongo.MongoClient("mongodb+srv://SaatvikK:" + str(MongoPwd) + "@main.l6fkh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
-    db = client["login"];
-    users = db.list_collection_names();
-    if(usrn in users):
-      return {"status": False, "reason": "usrn_already_exists"};
+    BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/"; # BaseURL of the API.
+    
+    LoginAttempt = req.get(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
+    # We can just return the result of this get request as we handle all the account verification and validation on the server side.
+    # The server side checks if the two usernames and passwords are the same. If so, it responds success. Else, failure.
+    
+    if(LoginAttempt["reason"] == "Password incorrect."):
+      res = req.post(BaseURL + "/users/" + usrn + "/" + pwd).json();
+      return res;
     else:
-      collection = db[usrn];
-      collection.insert_one({"username": usrn, "pwd": pwd});
-      return {"status": True};
+      return {"result": False, "reason": "Account already exists.", "error": None, "data": None };
 
   def menu(self):
     self.window = tk.Tk(); # Creating the tkinter window.
@@ -69,21 +59,20 @@ class loginMenu():
       usrn = self.UserInp.get(1.0, "end-1c"); # Getting the username from the text-box input.
       pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c")); # Getting the password from the text-box input.
       self.res = self.login(usrn, pwd);
-      if(self.res["status"] == True):
-        print(self.res)
-        self.window.destroy();
-
-      elif(self.res["reason"] == "pwd"): print("Password was not correct."); #pwd not correct
-      elif(self.res["reason"] == "usrn"): print("Username was not correct."); #usrn not correct
+      if(self.res["result"] == True):
+          print(self.res)
+          self.window.destroy();
+      else:
+        print(self.res);
       return;
     
     def execSignUp():
       usrn = self.UserInp.get(1.0, "end-1c");
       pwd = self.thisHash(self.PwdInp.get(1.0, "end-1c"));
       self.res = self.signup(usrn, pwd);
-      if(self.res["status"] == False):
-        if(self.res["reason"] == "usrn_already_exists"): print("Username already exists");
-      elif(self.res["status"] == True): print("Account created. Please login.");
+      if(self.res["error"] == None):
+        if(self.res["status"] == False): print(self.res);
+        elif(self.res["status"] == True): print("Account created. Please login.");
       return;
     
     def menuButtons():
