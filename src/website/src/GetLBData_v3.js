@@ -15,10 +15,13 @@ module.exports = async () => {
   return axios.get('https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/list')
   .then(function (response) {
     // handle success
-    const result = response.data;
+    let result = response.data;
+    console.log(result)
     if(result.result == true) {
+      info = result.data.info;
+      info = SortFunc(info);
       return new Promise(function(res, rej) { // Returning a promise. 
-        if(result.data.length > 0) res(result.data);
+        if(info.length > 0) res(info);
         else rej("X_X");
       });
     }

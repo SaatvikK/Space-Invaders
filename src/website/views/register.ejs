@@ -16,7 +16,7 @@
   </style>
 
   <body>
-    <% if(!err) alert(err) %>
+    <% if(err != null || err != undefined) { alert(err); } %>
     <a href = "/about" class = "ghost-button" style = "font-family: 'Montserrat', sans-serif;">About</a>
     <h1>Register</h1>
     <!-- Creating a form so that the user can input their username and password.

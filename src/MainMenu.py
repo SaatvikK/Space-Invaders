@@ -20,6 +20,7 @@ class mainMenu:
 
     # Getting the width and height of the monitor using tkinter, so that the main menu can be dynamic.
     self.ScreenWidth, self.ScreenHeight = self.window.winfo_screenwidth(), self.window.winfo_screenheight();
+    print(self.ScreenWidth, "x", self.ScreenHeight)
     self.window.title("Space Invaders: Main Menu");
     self.window.iconbitmap(); #Icon for window
     self.ButtonFont = tkFont.Font(family='Georgia', size=20, weight='bold');

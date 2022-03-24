@@ -45,7 +45,10 @@ class game():
   def generateGameID(self): # Generating a new game id. Executed in `Main.executeGame()`` in `main.py`.
     NewGameID = None;
     try:
-      games = os.listdir("../database"); # List of current game id's.
+      # The GameID must be unique not only to all games owned by the user, but also all games owned by any user.
+      # So to find all the GameIDs that exist, we must send a request to the cloud database via the API.
+      response = req.get("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/list").json();
+      games = response["data"]["IDs"]; # List of current game id's.
       if(len(games) == 0): return 1; # If there are no games, just assign THIS game an ID of 1.
       NewGameID = int(max(games)) + 1; # Else increment the highest ID in games[].
     except: NewGameID = 1;
