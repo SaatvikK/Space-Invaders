@@ -1,11 +1,13 @@
 ############ IMPORTS ############
 # Libraries
+import shutil
 import tkinter as tk;
 from tkinter import *;
 from tkinter import font as tkFont;
 import tkinter.filedialog;
 import os;
 import json;
+import requests as req; 
 
 # Other Modules
 from mergesort import *; # Importing my merge sort algorithm
@@ -52,18 +54,18 @@ class mainMenu:
     
     def menuButtons():
       # "New Game" Button
-      NewGame = tk.Button(self.window, text = "New Game", command = lambda: self.newGame(), height = 1, width = 10, font = self.ButtonFont);
+      NewGame = tk.Button(self.window, text = "New Game", command = self.newGame, height = 1, width = 10, font = self.ButtonFont);
       NewGame.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 - 40);
       
       # "Load Game" Button
-      LoadGame = tk.Button(self.window, text = "Load Game", command = lambda: self.loadGame(), height = 1, width = 10, font = self.ButtonFont);
+      LoadGame = tk.Button(self.window, text = "Load Game", command = self.loadGame, height = 1, width = 10, font = self.ButtonFont);
       LoadGame.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 40);
 
       # "Stats Page" Button
-      StatsPageButton = tk.Button(self.window, text = "Your Stats", command = lambda: self.statsPage(), height = 1, width = 10, font = self.ButtonFont);
+      StatsPageButton = tk.Button(self.window, text = "Your Stats", command = self.statsPage, height = 1, width = 10, font = self.ButtonFont);
       StatsPageButton.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 120)
 
-      Exit = tk.Button(self.window, text = "Exit App", command = lambda: self.exitApp(), height = 1, width = 10, font = self.ButtonFont);
+      Exit = tk.Button(self.window, text = "Exit App", command = self.exitApp, height = 1, width = 10, font = self.ButtonFont);
       Exit.place(x = self.ScreenWidth/2 - 80, y = self.ScreenHeight/2 + 200);
 
     backgroundDisplay();
@@ -113,7 +115,7 @@ class mainMenu:
     title.place(x = 0, y = 0);
 
     ## Back Button
-    BackButton = tk.Button(self.window, text = "Back", command = lambda: self.goBack(), height = 1, width = 10, font = self.ButtonFont);
+    BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
     BackButton.place(x = 5, y = 900);
 
     games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/")); # Getting all the games owned by the user.
@@ -169,7 +171,7 @@ class mainMenu:
     DiffMenu.place(x = 50, y = 200);
 
     ## Back Button
-    BackButton = tk.Button(self.window, text = "Back", command = lambda: self.goBack(), height = 1, width = 10, font = self.ButtonFont);
+    BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
     BackButton.place(x = 5, y = 900);
 
     def beginGame(): # Executed when the user finishes adjusting the new game's settings and clicks "Create Game".
@@ -224,12 +226,26 @@ class mainMenu:
       self.GameID = GamesDropDown.get();
       self.window.destroy();
     
+    def deleteGame():
+      game = GamesDropDown.get();
+      print(game)
+      try: 
+        shutil.rmtree("../database/" + str(game)); # Deleting the game from local db.
+      except: pass;
+
+      res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game));
+      print(res.json());
+
     # Once the user chooses a game, we load it from the latest saved state.
     SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
     SubmitButton.place(x = 5, y = 1000);
 
     ## Back Button
-    BackButton = tk.Button(self.window, text = "Back", command = lambda: self.goBack(), height = 1, width = 10, font = self.ButtonFont);
+    BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
     BackButton.place(x = 5, y = 900);
+
+    ## Delete Button
+    DeleteButton = tk.Button(self.window, text = "Delete This Game", command = deleteGame, height = 1, width = 15, font = self.ButtonFont);
+    DeleteButton.place(x = 5, y = 850);
     
   def exitApp(self): exit();
