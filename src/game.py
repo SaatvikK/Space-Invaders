@@ -208,7 +208,7 @@ class game():
     self.DBLoc = makeDB();
     # Saving the current game state.
     save({"value": self.score}, "stats/score.json");
-    save({"vaue": self.wave}, "stats/wave.json");
+    save({"value": self.wave}, "stats/wave.json");
     save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
     save({"username": self.usrn}, "settings/user.json");
