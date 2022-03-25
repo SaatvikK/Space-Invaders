@@ -1,5 +1,6 @@
 ############ IMPORTS ############
 # Libraries
+from concurrent.futures import thread
 import pygame;
 import random as rand;
 import json;
@@ -8,6 +9,7 @@ import time;
 import pymongo as mongo;
 import dotenv as env;
 import requests as req;
+import threading;
 
 # Other classes
 from spaceship import spaceShip;
@@ -88,20 +90,17 @@ class game():
         NewAlien = alien(100 + (j*100), 100 + (i*70), self.cooldowns["AlienBulletsMax"]);
         self.AliensGroup.add(NewAlien);
   
-  def scoreCounter(self): # Putting the current score on the screen.
-    img = self.font.render("Score: " + str(self.score), True, (255, 255, 255));
-    self.screen.blit(img, (0, 0));
+  def scoreAndWaveCounter(self, Type: str, variable: str, y: int): # Putting the current score on the screen.
+    img = self.font.render(str(Type) + ": " + str(variable), True, (255, 255, 255));
+    self.screen.blit(img, (0, y));
   
   def gameOver(self): # If the player has no lives left, close the game.
     if(self.ThisSpaceship.lives <= 0 or len(self.AliensGroup.sprites()) <= 0):
       img = self.font.render("GAME OVER!", True, (255, 255, 255));
       self.screen.blit(img, (self.WinWidth/2 - 100, self.WinHeight/2 - 100));
-      self.ThisSpaceship.kill(); time.sleep(2); exit();
+      self.ThisSpaceship.kill(); time.sleep(4); exit();
 
   def waveHandler(self): # If all aliens have been killed, start the next wave (increment wave counter --> execute game.makeAliens() again).
-    font = pygame.font.SysFont("Constantia", 30);
-    img = self.font.render("Wave: " + str(self.wave), True, (255, 255, 255));
-    self.screen.blit(img, (0, 50));
     if(len(self.AliensGroup.sprites()) <= 0): 
       self.wave += 1;
       print("wave now updated to", self.wave)
@@ -117,7 +116,9 @@ class game():
       for event in pygame.event.get():
         if(event.type == pygame.QUIT): running = False; self.saveGame(); exit(); # Saving the game before quitting.
 
-      self.scoreCounter();
+      #self.scoreCounter();
+      self.scoreAndWaveCounter("Score", self.score, 0);
+      self.scoreAndWaveCounter("Wave", self.wave, 30);
       self.gameOver();
       # Sprite group(s):
       # Drawing all the sprite groups onto the screen. When pygame calls this method, it draws every single sprite in the group onto the screen.
@@ -165,11 +166,11 @@ class game():
     def loadStats() -> dict: # Loading the stats from the database.
       with open("../database/" + str(self.GameID) + "/stats/score.json", "r") as file:
         data = json.load(file);
-        self.score = data["score"];
+        self.score = data["value"];
       
       with open("../database/" + str(self.GameID) + "/stats/wave.json", "r") as file:
         data = json.load(file);
-        self.wave = data["wave"];
+        self.wave = data["value"];
        
     def loadSettings() -> dict: # Loading the settings (eg difficulty) from the database.
       with open("../database/" + str(self.GameID) + "/settings/difficulty.json") as file:
@@ -207,7 +208,7 @@ class game():
     self.DBLoc = makeDB();
     # Saving the current game state.
     save({"value": self.score}, "stats/score.json");
-    save({"wave": self.wave}, "stats/wave.json");
+    save({"vaue": self.wave}, "stats/wave.json");
     save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
     save({"username": self.usrn}, "settings/user.json");
@@ -245,4 +246,18 @@ class game():
       if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
       else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
 
-    backupToCloud();
+    # w/ threads = 1.52 sec, w/o = 3.50 sec
+    # Threads are separate flows of execution. 
+    # They are executed almost simultaneously to decrease the time of execution.
+    # Here, we are creating a new thread with the target of the backupToCloud() function.
+
+    NewThread = threading.Thread(target = backupToCloud);
+    NewThread.start();
+
+    # Because this function is querying a separate server, located in the U.S., there is a lot of latency between requests and responses.
+    # Therefore, when the game is autosaving (either when it is created, or the application is closed), the program can appear, to the user,
+    # to freeze. In reality, it is just waiting for the cloud database server to respond to its requests.
+    # This may annoy users when they have created their game as it delays them playing the game.
+    # Therefore, this function is executed in a separate thread so that the user can instantly play the game whilst the game is backed up in the
+    # Background.
+    

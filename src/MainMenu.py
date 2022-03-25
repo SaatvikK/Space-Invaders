@@ -17,6 +17,7 @@ class mainMenu:
     self.usrn = usrn;
     self.IsDev = IsDev;
     self.window = tk.Tk();
+    self.window.attributes("-fullscreen", True)
 
     # Getting the width and height of the monitor using tkinter, so that the main menu can be dynamic.
     self.ScreenWidth, self.ScreenHeight = self.window.winfo_screenwidth(), self.window.winfo_screenheight();
@@ -172,7 +173,7 @@ class mainMenu:
   def checkIfGameOwnedByCurrentUser(self, games: list) -> list:
     OwnedGames = [];
     for i in range(len(games)):
-      with open("../database/" + str(games[i]) + "/settings/player.json", "r") as file:
+      with open("../database/" + str(games[i]) + "/settings/user.json", "r") as file:
         data = json.load(file);
         if(data["username"] == self.usrn):
           OwnedGames.append(games[i]);
