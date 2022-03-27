@@ -238,17 +238,17 @@ class game():
         
         self.usrn = spacesWith20(self.usrn);
 
-        res = req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
+        req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
 
       # Back up stats collection using a PUT method
-      res = req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
-      res = req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
+      req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
+      req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
       
       # Back up settings collection using a PUT method.
-      res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
-      res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
-      if(self.difficulty == "Casual/Normal"): res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
-      else: res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
+      if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
+      else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
     # w/ threads = 1.52 sec, w/o = 3.50 sec
     # Threads are separate flows of execution. 
     # They are executed almost simultaneously to decrease the time of execution.
