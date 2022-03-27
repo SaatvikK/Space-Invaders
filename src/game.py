@@ -10,6 +10,7 @@ import pymongo as mongo;
 import dotenv as env;
 import requests as req;
 import threading;
+import datetime as dt;
 
 # Other classes
 from spaceship import spaceShip;
@@ -35,6 +36,8 @@ class game():
     self.background = pygame.image.load("../assets/bg.png");
     self.score, self.wave = 0, 1;
     self.rows, self.cols = 1, 5;
+    self.DateCreated, self.TimeCreated = "", "";
+    self.DateLastPlayed, self.TimeLastPlayed = "", "";
 
     pygame.font.init();
     self.font = pygame.font.SysFont("Constantia", 30);
@@ -188,20 +191,15 @@ class game():
         data = json.load(file);
         self.ThisSpaceship.lives = data["LivesRemaining"];
         self.ThisSpaceship.TotalLives = data["TotalLives"];
+      
+      with open("../database/" + str(self.GameID) + "/settings/meta.json") as file:
+        data = json.load(file);
+        self.DateCreated, self.TimeCreated = data["created"]["date"], data["created"]["time"];
+        self.DateLastPlayed, self.TimeLastPlayed = data["LastPlayed"]["date"], data["LastPlayed"]["time"];
     
     loadStats(); loadSettings();
     
   def saveGame(self): # This function is executed in Main.executeGame() when a new game is being created and when the user quits a game that they are playing.
-    def makeDB() -> str: # First, a check is done to make sure that the database folder ("../database/") exists and a database for THIS GAME ("../database/GameID/").
-      DBLoc = "../database/" + str(self.GameID) + "/";
-      if(os.path.isdir("../database/") == False): os.mkdir("../database/");
-      if(os.path.isdir("../database/" + str(self.GameID)) == False):
-        os.mkdir("../database/" + str(self.GameID));
-        os.mkdir(DBLoc + "settings");
-        os.mkdir(DBLoc + "stats");
-
-      return DBLoc;
-
     def save(DictToSave: dict, collection: str):
       try:
         with open(self.DBLoc + collection, "w+") as file:
@@ -209,13 +207,42 @@ class game():
       
       except Exception as e: print(e);
     
+    def makeDB() -> str: # First, a check is done to make sure that the database folder ("../database/") exists and a database for THIS GAME ("../database/GameID/").
+      x = dt.datetime.now() # Current date-time.
+      self.DBLoc = "../database/" + str(self.GameID) + "/";
+      if(os.path.isdir("../database/") == False): os.mkdir("../database/");
+      if(os.path.isdir("../database/" + str(self.GameID)) == False):
+        os.mkdir("../database/" + str(self.GameID));
+        os.mkdir(self.DBLoc + "settings");
+        os.mkdir(self.DBLoc + "stats");
+        
+        save({ # Saving the meta data as none of this can be changed after creation (other than DateTime last played).
+          "username": self.usrn, 
+          "created": {
+            "date": str(x.day) + "/" + str(x.month) + "/" + str(x.year), 
+            "time": x.strftime("%H:%M:%S")
+          }, 
+          "LastPlayed": {
+            "date": str(x.day) + "/" + str(x.month) + "/" + str(x.year), 
+            "time": x.strftime("%H:%M:%S")
+          }
+        }, "settings/meta.json");
+
+      return self.DBLoc;
+    
     self.DBLoc = makeDB();
+    x = dt.datetime.now() # Current date-time.
     # Saving the current game state.
     save({"value": self.score}, "stats/score.json");
     save({"value": self.wave}, "stats/wave.json");
     save({"difficulty": self.difficulty, "AlienCooldown": self.AlienBulletCooldown["time"], "PlayerCooldown": self.ThisSpaceship.BulletCooldown["time"], "AlienBulletsMax": self.cooldowns["AlienBulletsMax"]}, "settings/difficulty.json");
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
-    save({"username": self.usrn}, "settings/user.json");
+
+    # Updating the LastPlayed sub-object.
+    with open("../database/" + str(self.GameID) + "/settings/meta.json") as metafile: 
+      data = json.load(metafile); data["LastPlayed"]["date"] = str(x.day) + "/" + str(x.month) + "/" + str(x.year);
+      data["LastPlayed"]["time"] = x.strftime("%H:%M:%S")
+      save(data, "settings/meta.json");
 
     def backupToCloud():
       # The following subroutine replaces all white spaces in the username with `%20`. This is done as a URL cannot have white-spaces and so %20 represents a space.

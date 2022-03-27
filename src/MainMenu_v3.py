@@ -9,7 +9,7 @@ import tkinter.filedialog;
 import os;
 import json;
 import requests as req; 
-
+from tkinter import ttk;
 # Other Modules
 from mergesort import *; # Importing my merge sort algorithm
 #################################
@@ -205,6 +205,13 @@ class mainMenu:
 
   def loadGame(self): # Executed if the user clicks "Load Game" in the main menu.
     if("LoadGame" not in self.stack): self.stack.append("LoadGame");
+    def beginGame(event):
+      self.type = "load";
+      for item in tree.selection():
+        ThisItem = tree.item(item);
+        self.GameID = ThisItem["values"][0];
+      self.window.destroy();
+      
     # opening load-game menu
     self.window.title("Space Invaders: Load a Game");
     # Destroy everything on the screen (i.e. the main menu)
@@ -217,13 +224,13 @@ class mainMenu:
     if(len(os.listdir("../database/")) > 0):
       # Getting all the games owned by the user so that they can be listed on the screen.
       games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
-      print("dfgdf", games)
-      ## Games
+
+      ## Title
       title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
       title.place(x = 0, y = 0);
       
 
-      DataToEnter = [["GameID", "Created", "Last Played", " "]];
+      DataToEnter = [];
       for i in range(len(games)):
         with open("../database/" + str(games[i]) + "/settings/meta.json") as file:
           data = json.load(file);
@@ -231,25 +238,15 @@ class mainMenu:
           LastPlayed = data["LastPlayed"]["date"] + " @ " + data["LastPlayed"]["time"];
           DataToEnter.append([games[i], created, LastPlayed, "LOAD GAME"]);
 
+      tree = ttk.Treeview(self.window, columns = ["GameID", "Created", "Last Played", " "], show = "headings");
+      tree.heading("GameID", text = "Game ID"); tree.heading("Created", text = "Created"); 
+      tree.heading("Last Played", text = "Last Played"); tree.heading(" ", text = " ");
 
-      for i in range(len(games) + 1): #Rows
-        for j in range(4): #Columns
-          b = Entry(self.window, width=20, fg='blue', font=('Arial',16,'bold'));
-          b.grid(row = i, column = j);
-          b.insert(END, DataToEnter[i][j]);
+      for row in DataToEnter:
+        tree.insert("", tk.END, values = row);
       
-
-
-
-
-      def beginGame():
-        self.type = "load";
-        #self.GameID = GamesDropDown.get();
-        self.window.destroy();
-      
-      # Once the user chooses a game, we load it from the latest saved state.
-      SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
-      SubmitButton.place(x = 5, y = 1000);
+      tree.bind("<<TreeviewSelect>>", beginGame)
+      tree.grid(row = 0, column = 0);
 
       ## Delete Button
       # We only display the delete button if there are any games in the DB. That way, we dont need to carry out the same check in mainMenu.deleteGame().
@@ -272,6 +269,18 @@ class mainMenu:
     for widget in self.window.winfo_children():
       widget.destroy();
 
+    def delete(event):
+      self.type = "delete";
+      game = None;
+      for item in tree.selection():
+        ThisItem = tree.item(item);
+        game = ThisItem["values"][0];
+      try: 
+        shutil.rmtree("../database/" + str(game)); # Deleting the game from local db.
+      except: pass;
+      print("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game))
+      res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game));
+      print(res.json());
     self.backgroundDisplay();
 
     # Getting all the games owned by the user so that they can be listed on the screen.
@@ -280,32 +289,28 @@ class mainMenu:
     ## Games
     title = tk.Label(self.window, text = "Delete a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
-    GamesDropDown = tk.StringVar(self.window); GamesDropDown.set("Select a game...");
-    GamesMenu = tk.OptionMenu(self.window, GamesDropDown, *games);
-    GamesMenu.place(x = 50, y= 100);
 
-    def delete():
-      game = GamesDropDown.get();
-      print(game)
-      try: 
-        shutil.rmtree("../database/" + str(game)); # Deleting the game from local db.
-      except: pass;
-      print("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game))
-      res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game));
-      print(res.json());
+    DataToEnter = [];
+    for i in range(len(games)):
+      with open("../database/" + str(games[i]) + "/settings/meta.json") as file:
+        data = json.load(file);
+        created = data["created"]["date"] + " @ " + data["created"]["time"];
+        LastPlayed = data["LastPlayed"]["date"] + " @ " + data["LastPlayed"]["time"];
+        DataToEnter.append([games[i], created, LastPlayed, "LOAD GAME"]);
+
+    tree = ttk.Treeview(self.window, columns = ["GameID", "Created", "Last Played", " "], show = "headings");
+    tree.heading("GameID", text = "Game ID"); tree.heading("Created", text = "Created"); 
+    tree.heading("Last Played", text = "Last Played"); tree.heading(" ", text = " ");
+
+    for row in DataToEnter:
+      tree.insert("", tk.END, values = row);
+    
+    tree.bind("<<TreeviewSelect>>", delete)
+    tree.grid(row = 0, column = 0);
 
     ## Back Button
     BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
     BackButton.place(x = 5, y = 900);
 
-    ## Delete Button
-    DeleteButton = tk.Button(self.window, text = "Delete This Game", command = delete, height = 1, width = 15, font = self.ButtonFont);
-    DeleteButton.place(x = 5, y = 850);
-
 
   def exitApp(self): exit();
-
-
-
-new = mainMenu("dev", "admin");
-new.menuStart();

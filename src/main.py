@@ -1,7 +1,7 @@
 ############ IMPORTS ############
 # Classes
 from game import game;
-from MainMenu_v2 import mainMenu;
+from MainMenu_v3 import mainMenu;
 from LoginMenu import loginMenu;
 import sys;
 #################################
