@@ -49,11 +49,15 @@ class game():
     try:
       # The GameID must be unique not only to all games owned by the user, but also all games owned by any user.
       # So to find all the GameIDs that exist, we must send a request to the cloud database via the API.
-      response = req.get("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/list").json();
+      response = req.get("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/list");
+      response = response.json();
+      print("GAME ID RES:", response)
       games = response["data"]["IDs"]; # List of current game id's.
       if(len(games) == 0): return 1; # If there are no games, just assign THIS game an ID of 1.
       NewGameID = int(max(games)) + 1; # Else increment the highest ID in games[].
-    except: NewGameID = 1;
+    except Exception as e: NewGameID = 1; print(e)
+
+    print("GAMEID:", NewGameID)
     return NewGameID;
   
   def clock(self):
@@ -234,18 +238,17 @@ class game():
         
         self.usrn = spacesWith20(self.usrn);
 
-        req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
-      
+        res = req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
+
       # Back up stats collection using a PUT method
-      req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
-      req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
+      res = req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
+      res = req.put(BaseURL + "/" + str(self.GameID) + "/stats/wave/value/" + str(self.wave));
       
       # Back up settings collection using a PUT method.
-      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
-      req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
-      if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
-      else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
-
+      res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
+      res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
+      if(self.difficulty == "Casual/Normal"): res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
+      else: res = req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
     # w/ threads = 1.52 sec, w/o = 3.50 sec
     # Threads are separate flows of execution. 
     # They are executed almost simultaneously to decrease the time of execution.

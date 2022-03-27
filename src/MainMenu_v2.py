@@ -1,5 +1,6 @@
 ############ IMPORTS ############
 # Libraries
+#from locale import textdomain
 import shutil
 import tkinter as tk;
 from tkinter import *;
@@ -211,41 +212,78 @@ class mainMenu:
       widget.destroy();
 
     self.backgroundDisplay();
+
+    # Only display the load game option if there are any games in the database.
+    if(len(os.listdir("../database/")) > 0):
+      # Getting all the games owned by the user so that they can be listed on the screen.
+      games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
+
+      ## Games
+      title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+      title.place(x = 0, y = 0);
+      GamesDropDown = tk.StringVar(self.window); GamesDropDown.set("Select a game...");
+      GamesMenu = tk.OptionMenu(self.window, GamesDropDown, *games);
+      GamesMenu.place(x = 50, y= 100);
+
+      def beginGame():
+        self.type = "load";
+        self.GameID = GamesDropDown.get();
+        self.window.destroy();
+      
+      # Once the user chooses a game, we load it from the latest saved state.
+      SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
+      SubmitButton.place(x = 5, y = 1000);
+
+      ## Delete Button
+      # We only display the delete button if there are any games in the DB. That way, we dont need to carry out the same check in mainMenu.deleteGame().
+      DeleteButton = tk.Button(self.window, text = "Delete A Game", command = self.deleteGame, height = 1, width = 15, font = self.ButtonFont);
+      DeleteButton.place(x = 5, y = 850);
+
+    else: 
+      text = tk.Label(self.window, text = "There are no games in the local database.", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+      text.place(x = self.ScreenWidth//2, y = self.ScreenHeight//2 - 100);
+
+    ## Back Button
+    BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
+    BackButton.place(x = 5, y = 900);
+    
+  def deleteGame(self):
+    if("DeleteGame" not in self.stack): self.stack.append("DeleteGame");
+    # opening load-game menu
+    self.window.title("Space Invaders: Delete a Game");
+    # Destroy everything on the screen (i.e. the main menu)
+    for widget in self.window.winfo_children():
+      widget.destroy();
+
+    self.backgroundDisplay();
+
     # Getting all the games owned by the user so that they can be listed on the screen.
     games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/"));
 
     ## Games
-    title = tk.Label(self.window, text = "Load a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
+    title = tk.Label(self.window, text = "Delete a Game", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
     title.place(x = 0, y = 0);
     GamesDropDown = tk.StringVar(self.window); GamesDropDown.set("Select a game...");
     GamesMenu = tk.OptionMenu(self.window, GamesDropDown, *games);
     GamesMenu.place(x = 50, y= 100);
 
-    def beginGame():
-      self.type = "load";
-      self.GameID = GamesDropDown.get();
-      self.window.destroy();
-    
-    def deleteGame():
+    def delete():
       game = GamesDropDown.get();
       print(game)
       try: 
         shutil.rmtree("../database/" + str(game)); # Deleting the game from local db.
       except: pass;
-
+      print("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game))
       res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(game));
       print(res.json());
-
-    # Once the user chooses a game, we load it from the latest saved state.
-    SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
-    SubmitButton.place(x = 5, y = 1000);
 
     ## Back Button
     BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
     BackButton.place(x = 5, y = 900);
 
     ## Delete Button
-    DeleteButton = tk.Button(self.window, text = "Delete This Game", command = deleteGame, height = 1, width = 15, font = self.ButtonFont);
+    DeleteButton = tk.Button(self.window, text = "Delete This Game", command = delete, height = 1, width = 15, font = self.ButtonFont);
     DeleteButton.place(x = 5, y = 850);
-    
+
+
   def exitApp(self): exit();
