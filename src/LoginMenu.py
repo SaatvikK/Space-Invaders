@@ -1,10 +1,7 @@
 ############ IMPORTS ############
 # Libraries
 from typing import Dict
-from dotenv.main import dotenv_values
 import random as rand;
-import pymongo as mongo;
-import dotenv as env;
 import tkinter as tk;
 from tkinter import *;
 from tkinter import font as tkFont;
