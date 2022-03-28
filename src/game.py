@@ -6,8 +6,6 @@ import random as rand;
 import json;
 import os;
 import time;
-import pymongo as mongo;
-import dotenv as env;
 import requests as req;
 import threading;
 import datetime as dt;
@@ -219,11 +217,11 @@ class game():
         save({ # Saving the meta data as none of this can be changed after creation (other than DateTime last played).
           "username": self.usrn, 
           "created": {
-            "date": str(x.day) + "/" + str(x.month) + "/" + str(x.year), 
+            "date": str(x.day) + "-" + str(x.month) + "-" + str(x.year), 
             "time": x.strftime("%H:%M:%S")
           }, 
           "LastPlayed": {
-            "date": str(x.day) + "/" + str(x.month) + "/" + str(x.year), 
+            "date": str(x.day) + "-" + str(x.month) + "-" + str(x.year), 
             "time": x.strftime("%H:%M:%S")
           }
         }, "settings/meta.json");
