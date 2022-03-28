@@ -10,6 +10,7 @@ import os;
 import json;
 import requests as req; 
 from tkinter import ttk;
+
 # Other Modules
 from mergesort import *; # Importing my merge sort algorithm
 #################################
@@ -79,7 +80,7 @@ class mainMenu:
     def readStats(games: list) -> dict: # "games" is a list of GameIDs owned by the currently logged in user.
       stats = [];
       for i in range(len(games)): # Iterating through the list.
-        with open("../database/" + str(games[i]) + "/settings/user.json", "r") as file: # Opening settings/player.json
+        with open("../database/" + str(games[i]) + "/settings/meta.json", "r") as file: # Opening settings/player.json
           data = json.load(file);
           if(data["username"] == self.usrn): # Checking if the game that is currently being looked at is owned by the user.
 
@@ -89,23 +90,14 @@ class mainMenu:
 
               with open("../database/" + str(games[i]) + "/stats/wave.json", "r") as statsfile2: # Opening stats/wave.json
                 data2 = json.load(statsfile2);
-                stats.append({ # Creating a dicttionary for THIS game and appending it to the stats[] array. 
-                  "score": data1["value"], 
-                  "wave": data2["value"],
-                  "id": games[i]
-                });
-                # The format of the stats[] array is as follows:
-                # stats = [{
-                #   "score":,
-                #   "wave":,
-                #   "id":
-                #  },
-                #  {
-                #  ...
-                #  }
-                #];
+                stats.append([ # Creating an array for THIS game and appending it to the stats[] array. 
+                  games[i], # GameID
+                  data1["value"], # score
+                  data2["value"], # wave
+                  data["created"]["date"] + " @ " + data["created"]["time"], # Created
+                  data["LastPlayed"]["date"] + " @ " + data["LastPlayed"]["time"] # Last Played
+                ]); # This has to be an array (not a dictionary) because TreeView only uses arrays - not dictionaries.
       return stats;
-
 
     for widget in self.window.winfo_children(): # Destroying everything on the screen (so that it is blank).
       widget.destroy();
@@ -126,23 +118,18 @@ class mainMenu:
     # A merge sort was used over a bubble sort algorithm as it can complete a sort operation in O(n log n) time (worst case performance).
     # This is far better than a bubble sort's O(n^2) time.
     stats = driverMethod(stats);
-    for i in range(len(stats)): # Iterating through the newly-sorted stats list.
-      # Printing out the stats for the game.
-      boop = tk.Label(
-        self.window, 
-        text = 
-          str(i + 1) + 
-          ") Game: " + 
-          str(stats[i]["id"]) + 
-          ", Score: " + 
-          str(stats[i]["score"]) + 
-          ", Wave: " + 
-          str(stats[i]["wave"]
-        ),
-        font = tkFont.Font(family = "Georgia", size = 15, weight = "bold")
-      );
-      if(i == 0): boop.place(x = 50, y = 100);
-      else: boop.place(x = 50, y = i*150);
+
+    tree = ttk.Treeview(self.window, columns = ["id", "score", "wave", "created", "LastPlayed"], show = "headings");
+    tree.heading("id", text = "Game ID"); tree.heading("score", text = "Score"); 
+    tree.heading("wave", text = "Wave"); tree.heading("created", text = "Created"); 
+    tree.heading("LastPlayed", text = "Last Played");
+
+    for row in stats:
+      print(row)
+      tree.insert("", tk.END, values = row);
+    
+    tree.bind("<<TreeviewSelect>>")
+    tree.grid(row = 0, column = 0);
 
     return;
   
@@ -173,7 +160,7 @@ class mainMenu:
 
     ## Back Button
     BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
-    BackButton.place(x = 5, y = 900);
+    BackButton.place(x = 5, y = self.ScreenHeight - 500);
 
     def beginGame(): # Executed when the user finishes adjusting the new game's settings and clicks "Create Game".
       self.type = "create";
@@ -191,7 +178,7 @@ class mainMenu:
       
 
     SubmitButton = tk.Button(self.window, text = "Create Game", command = beginGame);
-    SubmitButton.place(x = 5, y = 1000);
+    SubmitButton.place(x = 5, y = self.ScreenHeight - 200);
 
   # This method returns all the games owned by the currently logged in user given a list of Game IDs.
   def checkIfGameOwnedByCurrentUser(self, games: list) -> list:
@@ -243,6 +230,7 @@ class mainMenu:
       tree.heading("Last Played", text = "Last Played"); tree.heading(" ", text = " ");
 
       for row in DataToEnter:
+        print(row)
         tree.insert("", tk.END, values = row);
       
       tree.bind("<<TreeviewSelect>>", beginGame)
@@ -251,7 +239,7 @@ class mainMenu:
       ## Delete Button
       # We only display the delete button if there are any games in the DB. That way, we dont need to carry out the same check in mainMenu.deleteGame().
       DeleteButton = tk.Button(self.window, text = "Delete A Game", command = self.deleteGame, height = 1, width = 15, font = self.ButtonFont);
-      DeleteButton.place(x = 5, y = 850);
+      DeleteButton.place(x = 5, y = self.ScreenHeight - 400);
 
     else: 
       text = tk.Label(self.window, text = "There are no games in the local database.", font =  tkFont.Font(family = "Georgia", size = 20, weight = "bold", slant = "italic"));
@@ -259,7 +247,7 @@ class mainMenu:
 
     ## Back Button
     BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
-    BackButton.place(x = 5, y = 900);
+    BackButton.place(x = 5, y = self.ScreenHeight - 200);
     
   def deleteGame(self):
     if("DeleteGame" not in self.stack): self.stack.append("DeleteGame");
@@ -310,7 +298,7 @@ class mainMenu:
 
     ## Back Button
     BackButton = tk.Button(self.window, text = "Back", command = self.goBack, height = 1, width = 10, font = self.ButtonFont);
-    BackButton.place(x = 5, y = 900);
+    BackButton.place(x = 5, y = self.ScreenHeight - 200);
 
 
   def exitApp(self): exit();
