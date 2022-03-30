@@ -198,6 +198,12 @@ class game():
     loadStats(); loadSettings();
     
   def saveGame(self): # This function is executed in Main.executeGame() when a new game is being created and when the user quits a game that they are playing.
+    def getDateTime():
+      x = dt.datetime.now(); # Current date-time.
+      date = str(x.day) + "-" + str(x.month) + "-" + str(x.year);
+      time = x.strftime("%H:%M:%S");
+      return (date, time);
+    
     def save(DictToSave: dict, collection: str):
       try:
         with open(self.DBLoc + collection, "w+") as file:
@@ -206,7 +212,6 @@ class game():
       except Exception as e: print(e);
     
     def makeDB() -> str: # First, a check is done to make sure that the database folder ("../database/") exists and a database for THIS GAME ("../database/GameID/").
-      x = dt.datetime.now() # Current date-time.
       self.DBLoc = "../database/" + str(self.GameID) + "/";
       if(os.path.isdir("../database/") == False): os.mkdir("../database/");
       if(os.path.isdir("../database/" + str(self.GameID)) == False):
@@ -214,22 +219,23 @@ class game():
         os.mkdir(self.DBLoc + "settings");
         os.mkdir(self.DBLoc + "stats");
         
+        self.DateLastPlayed, self.TimeLastPlayed = getDateTime();
         save({ # Saving the meta data as none of this can be changed after creation (other than DateTime last played).
           "username": self.usrn, 
           "created": {
-            "date": str(x.day) + "-" + str(x.month) + "-" + str(x.year), 
-            "time": x.strftime("%H:%M:%S")
+            "date": date, 
+            "time": time
           }, 
           "LastPlayed": {
-            "date": str(x.day) + "-" + str(x.month) + "-" + str(x.year), 
-            "time": x.strftime("%H:%M:%S")
+            "date": date, 
+            "time": time
           }
         }, "settings/meta.json");
 
       return self.DBLoc;
     
     self.DBLoc = makeDB();
-    x = dt.datetime.now() # Current date-time.
+    self.DateLastPlayed, self.TimeLastPlayed = getDateTime();
     # Saving the current game state.
     save({"value": self.score}, "stats/score.json");
     save({"value": self.wave}, "stats/wave.json");
@@ -237,9 +243,9 @@ class game():
     save({"LivesRemaining": self.ThisSpaceship.lives, "TotalLives": self.ThisSpaceship.TotalLives}, "settings/lives.json");
 
     # Updating the LastPlayed sub-object.
-    with open("../database/" + str(self.GameID) + "/settings/meta.json") as metafile: 
-      data = json.load(metafile); data["LastPlayed"]["date"] = str(x.day) + "/" + str(x.month) + "/" + str(x.year);
-      data["LastPlayed"]["time"] = x.strftime("%H:%M:%S")
+    with open("../database/" + str(self.GameID) + "/settings/meta.json") as metafile:
+      data = json.load(metafile); data["LastPlayed"]["date"] = self.DateLastPlayed;
+      data["LastPlayed"]["time"] = self.TimeLastPlayed;
       save(data, "settings/meta.json");
 
     def backupToCloud():
@@ -272,6 +278,8 @@ class game():
       # Back up settings collection using a PUT method.
       req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/TotalLives/" + str(self.ThisSpaceship.TotalLives));
       req.put(BaseURL + "/" + str(self.GameID) + "/settings/lives/LivesRemaining/" + str(self.ThisSpaceship.lives));
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/meta/DateLastPlayed/" + str(self.DateLastPlayed));
+      req.put(BaseURL + "/" + str(self.GameID) + "/settings/meta/TimeLastPlayed/" + str(self.TimeLastPlayed));
       if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
       else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
     # w/ threads = 1.52 sec, w/o = 3.50 sec
