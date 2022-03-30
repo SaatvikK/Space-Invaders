@@ -21,6 +21,7 @@ class alien(pygame.sprite.Sprite):
     self.rect = self.image.get_rect(); # hit-box
     self.rect.center = (x, y);
     self.speed = 5;
+    self.MoveDown = [];
 
   # Pygame sprites come with a pre-built update() function, however it does not include certain operations that we need, so we'll rewrite it:
   def update(self, height):
@@ -34,7 +35,14 @@ class alien(pygame.sprite.Sprite):
     
     # Here the aliens are slowly moving down until they reach the bottom (game over).
     if(self.rect.bottom < height):
-      self.rect.centery += 0;
+      sped = 10;
+      lastones = self.MoveDown[-sped:];
+      if((all(lastones) == True and len(lastones) >= sped) or (all(lastones) == False and len(lastones) == sped)):
+        self.rect.centery += 1;
+        self.MoveDown.append(True);
+      else: self.MoveDown.append(False);
+        
+        
     else:
       # game over
       pass;

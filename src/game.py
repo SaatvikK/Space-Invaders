@@ -34,8 +34,8 @@ class game():
     self.background = pygame.image.load("../assets/bg.png");
     self.score, self.wave = 0, 1;
     self.rows, self.cols = 1, 5;
-    self.DateCreated, self.TimeCreated = "", "";
-    self.DateLastPlayed, self.TimeLastPlayed = "", "";
+    self.DateCreated, self.TimeCreated = self.getDateTime();
+    self.DateLastPlayed, self.TimeLastPlayed = self.DateCreated, self.TimeCreated;
 
     pygame.font.init();
     self.font = pygame.font.SysFont("Constantia", 30);
@@ -52,7 +52,6 @@ class game():
       # So to find all the GameIDs that exist, we must send a request to the cloud database via the API.
       response = req.get("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/list");
       response = response.json();
-      print("GAME ID RES:", response)
       games = response["data"]["IDs"]; # List of current game id's.
       if(len(games) == 0): return 1; # If there are no games, just assign THIS game an ID of 1.
       NewGameID = int(max(games)) + 1; # Else increment the highest ID in games[].
@@ -95,8 +94,12 @@ class game():
         NewAlien = alien(100 + (j*100), 100 + (i*70), self.cooldowns["AlienBulletsMax"]);
         self.AliensGroup.add(NewAlien);
   
-  def scoreAndWaveCounter(self, Type: str, variable: str, y: int): # Putting the current score on the screen.
-    img = self.font.render(str(Type) + ": " + str(variable), True, (255, 255, 255));
+  def counter(self, Type: str, variable: str, y: int): # Putting the current score on the screen.
+    text = None;
+    if(Type == "Lives"):
+      text = str(Type) + ": " + str(variable) + "/" + str(self.ThisSpaceship.TotalLives) + " lives";
+    else: text = str(Type) + ": " + str(variable);
+    img = self.font.render(text, True, (255, 255, 255));
     self.screen.blit(img, (0, y));
   
   def gameOver(self): # If the player has no lives left, close the game.
@@ -122,8 +125,10 @@ class game():
         if(event.type == pygame.QUIT): running = False; self.saveGame(); exit(); # Saving the game before quitting.
 
       #self.scoreCounter();
-      self.scoreAndWaveCounter("Score", self.score, 0);
-      self.scoreAndWaveCounter("Wave", self.wave, 30);
+      self.counter("Score", self.score, 0);
+      self.counter("Wave", self.wave, 30);
+      self.counter("Lives", self.ThisSpaceship.lives, 60);
+
       self.gameOver();
       # Sprite group(s):
       # Drawing all the sprite groups onto the screen. When pygame calls this method, it draws every single sprite in the group onto the screen.
@@ -196,14 +201,14 @@ class game():
         self.DateLastPlayed, self.TimeLastPlayed = data["LastPlayed"]["date"], data["LastPlayed"]["time"];
     
     loadStats(); loadSettings();
-    
+  
+  def getDateTime(self):
+    x = dt.datetime.now(); # Current date-time.
+    date = str(x.day) + "-" + str(x.month) + "-" + str(x.year);
+    time = x.strftime("%H:%M:%S");
+    return (date, time);
+
   def saveGame(self): # This function is executed in Main.executeGame() when a new game is being created and when the user quits a game that they are playing.
-    def getDateTime():
-      x = dt.datetime.now(); # Current date-time.
-      date = str(x.day) + "-" + str(x.month) + "-" + str(x.year);
-      time = x.strftime("%H:%M:%S");
-      return (date, time);
-    
     def save(DictToSave: dict, collection: str):
       try:
         with open(self.DBLoc + collection, "w+") as file:
@@ -219,23 +224,23 @@ class game():
         os.mkdir(self.DBLoc + "settings");
         os.mkdir(self.DBLoc + "stats");
         
-        self.DateLastPlayed, self.TimeLastPlayed = getDateTime();
+        self.DateLastPlayed, self.TimeLastPlayed = self.getDateTime();
         save({ # Saving the meta data as none of this can be changed after creation (other than DateTime last played).
           "username": self.usrn, 
           "created": {
-            "date": date, 
-            "time": time
+            "date": self.DateLastPlayed, 
+            "time": self.TimeLastPlayed
           }, 
           "LastPlayed": {
-            "date": date, 
-            "time": time
+            "date": self.DateLastPlayed, 
+            "time": self.TimeLastPlayed
           }
         }, "settings/meta.json");
 
       return self.DBLoc;
     
     self.DBLoc = makeDB();
-    self.DateLastPlayed, self.TimeLastPlayed = getDateTime();
+    self.DateLastPlayed, self.TimeLastPlayed = self.getDateTime();
     # Saving the current game state.
     save({"value": self.score}, "stats/score.json");
     save({"value": self.wave}, "stats/wave.json");
@@ -264,12 +269,13 @@ class game():
 
       # Next, a request is made with the GET HTTP method using the the url: `https://www.domain.com/NEA_API/v1/[GameID]`,
       DoesGameExist = req.get(BaseURL + "/" + str(self.GameID)).json();
+      print("DoesGameExist:", DoesGameExist)
       if(DoesGameExist["DoesGameExist"] == False): # The server will response with a JSON and a boolean value. If the value is false, the game's database DOES NOT exist in the database server.
         # Because it doesn't exist, it must first be made using a POST http method.
-        
-        self.usrn = spacesWith20(self.usrn);
 
-        req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
+        self.usrn = spacesWith20(self.usrn); print(self.usrn)
+
+        req.post(BaseURL + "/" + str(self.GameID) + "/" + self.usrn + "/" + self.DateCreated + "/" + self.TimeCreated); # Next, a request is made using POST to `/NEA_API/v1/[GameID]/[Username]`
 
       # Back up stats collection using a PUT method
       req.put(BaseURL + "/" + str(self.GameID) + "/stats/score/value/" + str(self.score));
