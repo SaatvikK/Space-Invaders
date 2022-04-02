@@ -1,8 +1,7 @@
 ############ IMPORTS ############
 # Classes
 from game import game;
-from MainMenu_v3 import mainMenu;
-from LoginMenu import loginMenu;
+from LoginMenu_v2 import loginMenu;
 import sys;
 #################################
 
@@ -16,12 +15,14 @@ class Main():
   def main(self):
     if(self.IsDev == "dev"): # If `IsDev` is true, the login-system is byassed and the developer logins using the `admin` account.
       self.executeGame("admin"); # If in developer mode, auto-log in as "admin".
-    
-    newlogin = loginMenu(); # Instantiate a new login menu.
-    newlogin.menu(); # Execute the menu method to display the login menu.
-    if(newlogin.res["result"] == True): # `newlogin.res` is a dictionary that holds two key-value pairs: 1. The status of the last attempted login (boolean); 2. The reason of the failed login (usrname/pwd wrong or a server error).
-      self.executeGame(newlogin.res["usrn"]); # Execute the game if the login attempt was successful. We pass in the username into the game object.
-      exit();
+    else:
+      newlogin = loginMenu(); # Instantiate a new login menu.
+      newlogin.menu(); # Execute the menu method to display the login menu.
+      """
+      print("hllo")
+      if(newlogin.res["result"] == True): # `newlogin.res` is a dictionary that holds two key-value pairs: 1. The status of the last attempted login (boolean); 2. The reason of the failed login (usrname/pwd wrong or a server error).
+        self.executeGame(newlogin.res["usrn"]); # Execute the game if the login attempt was successful. We pass in the username into the game object.
+        exit();
     
 
   
@@ -47,7 +48,7 @@ class Main():
       newgame.makeBarriers();
       newgame.saveGame();
       newgame.gameLoop();
-
+"""
 if(__name__ == "__main__"):
   IsDev = sys.argv[1]; # During execution via CLI (`python main.py`) the developer can pass in an arguement to signify that they are a developer.
   MainObj = Main(IsDev);

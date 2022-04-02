@@ -20,9 +20,8 @@ from barrier import Barrier;
 # This object is essentially the "glue" for all the other classes that have a direct connection to the game.
 # It handles all game operations and passes data to other classes.
 class game():
-  def __init__(self, SpaceshipLives, cooldowns, difficulty, IsDev, usrn) -> None:
+  def __init__(self, SpaceshipLives, cooldowns, difficulty, usrn) -> None:
     self.usrn = usrn; # The username of the currently logged in player.
-    self.IsDev = IsDev;
     self.difficulty = difficulty;
     self.cooldowns = cooldowns;
     self.SpaceshipLives = SpaceshipLives;
