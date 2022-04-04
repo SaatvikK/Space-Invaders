@@ -302,3 +302,7 @@ class mainMenu:
 
 
   def exitApp(self): exit();
+
+
+n = mainMenu("dev", "admin");
+n.menuStart()
