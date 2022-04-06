@@ -14,9 +14,11 @@ import json;
 import os; 
 import numpy as np;
 import shutil;
+from tkinter import ttk;
 
 #from main import MainObj;
 from game import game;
+from mergesort import driverMethod;
 #################################
 
 
@@ -212,8 +214,62 @@ class mainMenu(ctk.CTk):
     BackButton.place(relx = 0.7, rely = 0.4, anchor = "center");
 
   def statsPage(self): 
-    if("StatsPage" not in self.stack): self.stack.append("StatsPage");
     print("stats page")
+    if("StatsPage" not in self.stack): self.stack.append("StatsPage");
+    # Getting the stats of each game that THIS player has played.
+    def readStats(games: list) -> dict: # "games" is a list of GameIDs owned by the currently logged in user.
+      stats = [];
+      for i in range(len(games)): # Iterating through the list.
+        with open("../database/" + str(games[i]) + "/settings/meta.json", "r") as file: # Opening settings/player.json
+          MetaData = json.load(file);
+          if(MetaData["username"] == self.usrn): # Checking if the game that is currently being looked at is owned by the user.
+
+            # If the game is owned bt the user, we grab the score and the wave number from the database:
+            with open("../database/" + str(games[i]) + "/stats/score.json", "r") as statsfile1: # Opening stats/score.json
+              ScoreData = json.load(statsfile1);
+
+              with open("../database/" + str(games[i]) + "/stats/wave.json", "r") as statsfile2: # Opening stats/wave.json
+                WaveData = json.load(statsfile2);
+                stats.append([ # Creating an array for THIS game and appending it to the stats[] array. 
+                  games[i], # GameID
+                  ScoreData["value"], # score
+                  WaveData["value"], # wave
+                  MetaData["created"]["date"] + " @ " + MetaData["created"]["time"], # Created
+                  MetaData["LastPlayed"]["date"] + " @ " + MetaData["LastPlayed"]["time"] # Last Played
+                ]); # This has to be an array (not a dictionary) because TreeView only uses arrays - not dictionaries.
+      return stats;
+
+    for widget in self.window.winfo_children(): # Destroying everything on the screen (so that it is blank).
+      widget.destroy();
+    
+    title = ctk.CTkLabel(self.window, text = "Your Stats",  text_font = ("Roboto", -40, "bold"));
+    title.place(relx = 0.5, rely = 0.2, anchor = "center");
+
+    ## Back Button
+    BackButton = ctk.CTkButton(self.window, text = "Back", command = self.goBack);
+    BackButton.place(relx = 0.9, rely = 0.5);
+
+    games = self.checkIfGameOwnedByCurrentUser(os.listdir("../database/")); # Getting all the games owned by the user.
+    stats = readStats(games);
+
+    # Merge sorting the AllScores list. `driverMethod()` is the driver code that initialises the mergeSort algorithm.
+    # A merge sort was used over a bubble sort algorithm as it can complete a sort operation in O(n log n) time (worst case performance).
+    # This is far better than a bubble sort's O(n^2) time.
+    stats = driverMethod(stats);
+
+    tree = ttk.Treeview(self.window, columns = ["id", "score", "wave", "created", "LastPlayed"], show = "headings");
+    tree.heading("id", text = "Game ID"); tree.heading("score", text = "Score"); 
+    tree.heading("wave", text = "Wave"); tree.heading("created", text = "Created"); 
+    tree.heading("LastPlayed", text = "Last Played");
+
+    for row in stats:
+      print(row)
+      tree.insert("", tkinter.END, values = row);
+    
+    tree.bind("<<TreeviewSelect>>")
+    tree.place(relx = 0.5, rely = 0.5, anchor = "center");
+
+    return;
   
   def executeGame(self):
     # The `self.type` attribute refers to which button the user clicked ("create game" or "load game").

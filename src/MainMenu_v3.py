@@ -129,7 +129,7 @@ class mainMenu:
       tree.insert("", tk.END, values = row);
     
     tree.bind("<<TreeviewSelect>>")
-    tree.grid(row = 0, column = 0);
+    tree.place(x = 100, y = 200);
 
     return;
   
