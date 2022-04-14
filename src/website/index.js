@@ -49,7 +49,7 @@ const errors = {};
 app.get("/leaderboard", function(req, res) {
   if(Object.keys(CurrentUsers).includes(req.sessionID)) // If the current client has successfully logged in.
     GetLBData().then(result => { // Get the data from the database server
-      result = result.reverse(); // Reverse the sorted list of game data.
+      if(typeof result == "object") result = result.reverse(); // Reverse the sorted list of game data.
       res.render("leaderboard", {data: result}); // And render it alongside the HTML.
     });
   else res.redirect("login"); // If the current client is not logged in, then redirect them to the login page.
@@ -75,7 +75,7 @@ app.get("/download", function (req, res) {
 app.get("/dashboard", function(req, res) {
   if(Object.keys(CurrentUsers).includes(req.sessionID)) { // If the current client has successfully logged in.
     GetLBData().then(result => { // Get the data from the MongoDB server
-      result = result.reverse(); // Reverse the sorted list of game data.
+      if(typeof result == "object") result = result.reverse(); // Reverse the sorted list of game data.
       console.log(result)
       const username = CurrentUsers[req.sessionID].usrn; // Get the current client's account username using their session ID.
       res.render("dashboard", {"username": username, "data": result }); // Render the page.

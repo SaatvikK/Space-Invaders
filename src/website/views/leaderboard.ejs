@@ -32,111 +32,113 @@
       but rather what difficulty the game is. Depending on the difficulty of the game, we sort it into the correct table.
       There is one table per difficulty. -->
       <!-- EASY -->
-      <div>
-      <br/>
-        <h3>Difficulty: "Easy"</h3>
-        <table style="width:20%;">
-          <tr>
-            <td><b><i>Rank</i></b></td>
-            <td><b><i>Game ID</i></b></td>
-            <td><b><i>Score</i></b></td>
-            <td><b><i>Username</i></b></td>
-          </tr>
-          <% let RankCounter = 1; %>
-          <% for(let i = 0; i < data.length; i++) { %>
-              <% if(data[i]["difficulty"] == "Easy") { %>
-                  <tr>
-                    <td><b><%= RankCounter %></b></td>
-                    <td><%= data[i]["GameID"] %></td>
-                    <td><%= data[i]["score"] %></td>
-                    <td><%= data[i]["username"] %></td>
-                  </tr>
-                  <% RankCounter++; %>
-              <% } %>
-          <% } %>
-        </table>
-      </div>
-
-
-      <!-- CASUAL/NORMAL -->
-      <div>
-      <br/>
-        <h3>Difficulty: "Casual/Normal"</h3>
-        <table style="width:20%;">
-          <tr>
-            <td><b><i>Rank</i></b></td>
-            <td><b><i>Game ID</i></b></td>
-            <td><b><i>Score</i></b></td>
-            <td><b><i>Username</i></b></td>
-          </tr>
-          <% RankCounter = 1; %>
-          <% for(let i = 0; i < data.length; i++) { %>
-              <% if(data[i]["difficulty"] == "Casual/Normal") { %>
-                  <tr>
-                    <td><b><%= RankCounter %></b></td>
-                    <td><%= data[i]["GameID"] %></td>
-                    <td><%= data[i]["score"] %></td>
-                    <td><%= data[i]["username"] %></td>
-                  </tr>
-                  <% RankCounter++; %>
-              <% } %>
-          <% } %>
-        </table>
-      </div>
-
-
-      <!-- MEDIUM -->
-      <div>
-      <br/>
-        <h3>Difficulty: "Medium"</h3>
-        <table style="width:20%;">
-          <tr>
-            <td><b><i>Rank</i></b></td>
-            <td><b><i>Game ID</i></b></td>
-            <td><b><i>Score</i></b></td>
-            <td><b><i>Username</i></b></td>
-          </tr>
-          <% RankCounter = 1; %>
-          <% for(let i = 0; i < data.length; i++) { %>
-              <% if(data[i]["difficulty"] == "Medium") { %>
-                  <tr>
-                    <td><b><%= RankCounter %></b></td>
-                    <td><%= data[i]["GameID"] %></td>
-                    <td><%= data[i]["score"] %></td>
-                    <td><%= data[i]["username"] %></td>
-                  </tr>
-                  <% RankCounter++; %>
-              <% } %>
-          <% } %>
-        </table>
-      </div>
-
-
-      <!-- Hard -->
-      <div>
-      <br/>
-        <h3>Difficulty: "Hard"</h3>
-        <table style="width:20%;">
-          <tr>
-            <td><b><i>Rank</i></b></td>
-            <td><b><i>Game ID</i></b></td>
-            <td><b><i>Score</i></b></td>
-            <td><b><i>Username</i></b></td>
-          </tr>
-          <% RankCounter = 1; %>
-          <% for(let i = 0; i < data.length; i++) { %>
-              <% if(data[i]["difficulty"] == "Hard") { %>
-                  <tr>
-                    <td><b><%= RankCounter %></b></td>
-                    <td><%= data[i]["GameID"] %></td>
-                    <td><%= data[i]["score"] %></td>
-                    <td><%= data[i]["username"] %></td>
-                  </tr>
-                  <% RankCounter++; %>
-              <% } %>
-          <% } %>
-        </table>
-      </div>
+      <% if(typeof data != "object") {%><h3>There are no games.</h3> <%} else {%>
+        <div>
+        <br/>
+          <h3>Difficulty: "Easy"</h3>
+          <table style="width:20%;">
+            <tr>
+              <td><b><i>Rank</i></b></td>
+              <td><b><i>Game ID</i></b></td>
+              <td><b><i>Score</i></b></td>
+              <td><b><i>Username</i></b></td>
+            </tr>
+            <% let RankCounter = 1; %>
+            <% for(let i = 0; i < data.length; i++) { %>
+                <% if(data[i]["difficulty"] == "Easy") { %>
+                    <tr>
+                      <td><b><%= RankCounter %></b></td>
+                      <td><%= data[i]["GameID"] %></td>
+                      <td><%= data[i]["score"] %></td>
+                      <td><%= data[i]["username"] %></td>
+                    </tr>
+                    <% RankCounter++; %>
+                <% } %>
+            <% } %>
+          </table>
+        </div>
+  
+  
+        <!-- CASUAL/NORMAL -->
+        <div>
+        <br/>
+          <h3>Difficulty: "Casual/Normal"</h3>
+          <table style="width:20%;">
+            <tr>
+              <td><b><i>Rank</i></b></td>
+              <td><b><i>Game ID</i></b></td>
+              <td><b><i>Score</i></b></td>
+              <td><b><i>Username</i></b></td>
+            </tr>
+            <% RankCounter = 1; %>
+            <% for(let i = 0; i < data.length; i++) { %>
+                <% if(data[i]["difficulty"] == "Casual/Normal") { %>
+                    <tr>
+                      <td><b><%= RankCounter %></b></td>
+                      <td><%= data[i]["GameID"] %></td>
+                      <td><%= data[i]["score"] %></td>
+                      <td><%= data[i]["username"] %></td>
+                    </tr>
+                    <% RankCounter++; %>
+                <% } %>
+            <% } %>
+          </table>
+        </div>
+  
+  
+        <!-- MEDIUM -->
+        <div>
+        <br/>
+          <h3>Difficulty: "Medium"</h3>
+          <table style="width:20%;">
+            <tr>
+              <td><b><i>Rank</i></b></td>
+              <td><b><i>Game ID</i></b></td>
+              <td><b><i>Score</i></b></td>
+              <td><b><i>Username</i></b></td>
+            </tr>
+            <% RankCounter = 1; %>
+            <% for(let i = 0; i < data.length; i++) { %>
+                <% if(data[i]["difficulty"] == "Medium") { %>
+                    <tr>
+                      <td><b><%= RankCounter %></b></td>
+                      <td><%= data[i]["GameID"] %></td>
+                      <td><%= data[i]["score"] %></td>
+                      <td><%= data[i]["username"] %></td>
+                    </tr>
+                    <% RankCounter++; %>
+                <% } %>
+            <% } %>
+          </table>
+        </div>
+  
+  
+        <!-- Hard -->
+        <div>
+        <br/>
+          <h3>Difficulty: "Hard"</h3>
+          <table style="width:20%;">
+            <tr>
+              <td><b><i>Rank</i></b></td>
+              <td><b><i>Game ID</i></b></td>
+              <td><b><i>Score</i></b></td>
+              <td><b><i>Username</i></b></td>
+            </tr>
+            <% RankCounter = 1; %>
+            <% for(let i = 0; i < data.length; i++) { %>
+                <% if(data[i]["difficulty"] == "Hard") { %>
+                    <tr>
+                      <td><b><%= RankCounter %></b></td>
+                      <td><%= data[i]["GameID"] %></td>
+                      <td><%= data[i]["score"] %></td>
+                      <td><%= data[i]["username"] %></td>
+                    </tr>
+                    <% RankCounter++; %>
+                <% } %>
+            <% } %>
+          </table>
+        </div>
+      <% } %>
     </div>
   </body>
 </html>

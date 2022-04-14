@@ -22,7 +22,7 @@ module.exports = async () => {
       info = SortFunc(info);
       return new Promise(function(res, rej) { // Returning a promise. 
         if(info.length > 0) res(info);
-        else rej("X_X");
+        else rej("none");
       });
     }
   })

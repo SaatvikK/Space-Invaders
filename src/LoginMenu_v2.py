@@ -91,23 +91,3 @@ class loginMenu(ctk.CTk):
   def executeMainMenu(self, usrn):
     newmenu = mainMenu(usrn); # Instantiating a new main menu.
     newmenu.menuStart(); # Starting the menu.
-    """
-    # The `newmenu.type` attribute refers to which button the user clicked ("create game" or "load game").
-    if(newmenu.type == "create"):
-      newgame = game(int(newmenu.Lives), newmenu.cooldowns, newmenu.difficulty, usrn); # Instantiating a new game object.
-      # Initializing the new game:
-      newgame.GameID = newgame.generateGameID();
-      newgame.createSprites();
-      newgame.makeAliens();
-      newgame.makeBarriers();
-      newgame.saveGame();
-      newgame.gameLoop();
-
-    elif(newmenu.type == "load"):
-      newgame = game(0, {"alien": 0, "player": 0, "AlienBulletsMax": 0}, "easy", usrn);
-      newgame.createSprites();
-      newgame.load(newmenu.GameID); # Loading the game.
-      newgame.makeAliens();
-      newgame.makeBarriers();
-      newgame.saveGame();
-      newgame.gameLoop();"""
