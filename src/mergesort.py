@@ -47,5 +47,3 @@ def driverMethod(arr):
   # Merge sort is O(n.logn) time
   mergeSort(arr, 0, len(arr) - 1); #0 = left pointer, len(arr) - 1 = right pointer
   return arr;
-
-

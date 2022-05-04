@@ -288,17 +288,6 @@ class game():
       if(self.difficulty == "Casual/Normal"): req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/Casual");
       else: req.put(BaseURL + "/" + str(self.GameID) + "/settings/difficulty/difficulty/" + self.difficulty);
     # w/ threads = 1.52 sec, w/o = 3.50 sec
-    # Threads are separate flows of execution. 
-    # They are executed almost simultaneously to decrease the time of execution.
-    # Here, we are creating a new thread with the target of the backupToCloud() function.
 
-    NewThread = threading.Thread(target = backupToCloud);
-    NewThread.start();
-
-    # Because this function is querying a separate server, located in the U.S., there is a lot of latency between requests and responses.
-    # Therefore, when the game is autosaving (either when it is created, or the application is closed), the program can appear, to the user,
-    # to freeze. In reality, it is just waiting for the cloud database server to respond to its requests.
-    # This may annoy users when they have created their game as it delays them playing the game.
-    # Therefore, this function is executed in a separate thread so that the user can instantly play the game whilst the game is backed up in the
-    # Background.
+    backupToCloud();
     

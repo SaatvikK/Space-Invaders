@@ -44,7 +44,8 @@ class alien(pygame.sprite.Sprite):
         
         
     else:
-      # game over
+      print("Game over");
+      exit();
       pass;
 
   def shoot(self, height, BulletGroup, cooldown, SpaceshipGroup):

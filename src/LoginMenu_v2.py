@@ -54,13 +54,14 @@ class loginMenu(ctk.CTk):
   def register(self, usrn: str, pwd: str) -> dict: #pwd = hashed password input
     BaseURL = "https://NEA-REST-API.thesatisback.repl.co/NEA_API/v1/"; # BaseURL of the API.
     
-    LoginAttempt = req.post(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
+    LoginAttempt = req.get(BaseURL + "users/" + usrn + "/" + pwd).json(); # Making a GET request to the endpoint that identifies the resource that holds account data.
     # We can just return the result of this get request as we handle all the account verification and validation on the server side.
     # The server side checks if the two usernames and passwords are the same. If so, it responds success. Else, failure.
     print(LoginAttempt)
     print("----------")
-    if(LoginAttempt["reason"] == "Password incorrect."):
-      self.res = req.post(BaseURL + "/users/" + usrn + "/" + pwd).json();
+    if(LoginAttempt["reason"] == "Username incorrect."):
+      print(usrn, pwd)
+      self.res = req.post(BaseURL + "users/" + usrn + "/" + pwd).json();
       if(self.res["result"] == False): print(self.res);
       elif(self.res["result"] == True): print("Account created. Please login."); self.res["reason"] = "Account created. Please login.";
     else:

@@ -171,42 +171,50 @@ class mainMenu(ctk.CTk):
       denominator = 1 + np.exp(-x);
       return 1/denominator;
 
-    self.radio_var = tkinter.IntVar(value=0);
+    
     self.GameID = None;
-    def putID(): self.GameID = DataToEnter[i]["ID"];
-
+    def putID(val): self.GameID = val;
+    IDs = [];
     for i in range(len(DataToEnter)):
+      IDs.append(DataToEnter[i]["ID"]);
+      self.radio_var = tkinter.IntVar(value=i);
       y = np.abs(sigmoid(i)) - 0.1;
       if(i != 0): y -= 0.3;
-      print(DataToEnter[i])
-      print(y)
-      string = "Game " + str(DataToEnter[i]["ID"]) + " was CREATED on " + DataToEnter[i]["created"] + " and LAST PALYED on " + DataToEnter[i]["LastPlayed"]; 
-      button = ctk.CTkRadioButton(master = self.window, value = i, command = lambda: putID(), text = string, variable = self.radio_var);
-      button.place(relx = 0.5, rely = y, anchor = "center");
+      string = "Game " + str(DataToEnter[i]["ID"]) + " was CREATED on " + DataToEnter[i]["created"] + " and LAST PLAYED on " + DataToEnter[i]["LastPlayed"]; 
+      label = ctk.CTkLabel(master = self.window, text = string);
+      #button = ctk.CTkRadioButton(master = self.window, value = i, command = lambda: putID(DataToEnter[i]["ID"]), text = string, variable = DataToEnter[i]["ID"]);
+      #print("BNUUUUTON", button.value)
+      label.place(relx = 0.5, rely = y, anchor = "center");
+    
+    DialogBox = ctk.CTkEntry(master = self.window, width = 120, placeholder_text = "<Select a GameID from the list>");
+    DialogBox.place(relx = 0.7, rely = 0.45)
 
-    def loadAGame():
-      if(self.GameID != None):
-        self.executeGame();
-      else:
-        self.errorPopUp("You must select a game to load.");    
 
-    def deleteAGAme():
-      if(self.GameID != None):
+    def loadAGame(GameID, AllIDs):
+      try: 
+        int(GameID);
+        for i in range(len(AllIDs)):
+          if(GameID in AllIDs): self.GameID = GameID; self.executeGame();
+          else: self.errorPopUp("The ID you have entered is not valid, please select one from the list.");
+      except Exception as e: self.errorPopUp("You must select a game to load.");    
+
+    def deleteAGame(GameID, AllIDs):
+      if(GameID in AllIDs):
         try: 
-          shutil.rmtree("../database/" + str(self.GameID)); # Deleting the game from local db.
+          shutil.rmtree("../database/" + str(GameID)); # Deleting the game from local db.
         except: pass;
-        print("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(self.GameID))
-        res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(self.GameID));
+        print("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(GameID))
+        res = req.delete("https://nea-rest-api.thesatisback.repl.co/NEA_API/v1/" + str(GameID));
         self.errorPopUp("Game successfully deleted.");
       else:
-        self.errorPopUp("You must select a game to delete.");
+        self.errorPopUp("The ID you have entered is not valid, please select one from the list.");
 
     ## Load Game Button
-    LoadGameButton = ctk.CTkButton(master = self.window, text = "Load This Game", command = loadAGame);
+    LoadGameButton = ctk.CTkButton(master = self.window, text = "Load This Game", command = lambda: loadAGame(DialogBox.get(), IDs));
     LoadGameButton.place(relx = 0.7, rely = 0.3, anchor = "center");
 
     ## Delete Game Button
-    DeleteGameButton = ctk.CTkButton(master = self.window, text = "Delete This Game", command = deleteAGAme);
+    DeleteGameButton = ctk.CTkButton(master = self.window, text = "Delete This Game", command = lambda: deleteAGame(DialogBox.get(), IDs));
     DeleteGameButton.place(relx = 0.7, rely = 0.35, anchor = "center");
 
     ## Back Button
@@ -303,5 +311,5 @@ class mainMenu(ctk.CTk):
     return OwnedGames;
 
 
-n = mainMenu("admin")
-n.menuStart()
+#n = mainMenu("admin")
+#n.menuStart()

@@ -2,6 +2,7 @@
 # Classes
 from game import game;
 from LoginMenu_v2 import loginMenu;
+from MainMenu_v4 import mainMenu;
 import sys;
 #################################
 
@@ -14,11 +15,14 @@ class Main():
   
   def main(self):
     if(self.IsDev == "dev"): # If `IsDev` is true, the login-system is byassed and the developer logins using the `admin` account.
-      self.executeGame("admin"); # If in developer mode, auto-log in as "admin".
+      self.executeMainMenu("admin"); # If in developer mode, auto-log in as "admin".
     else:
       newlogin = loginMenu(); # Instantiate a new login menu.
       newlogin.menu(); # Execute the menu method to display the login menu.
-      
+
+  def executeMainMenu(self, usrn):
+    newmenu = mainMenu(usrn); # Instantiating a new main menu.
+    newmenu.menuStart(); # Starting the menu.
 if(__name__ == "__main__"):
   IsDev = sys.argv[1]; # During execution via CLI (`python main.py`) the developer can pass in an arguement to signify that they are a developer.
   MainObj = Main(IsDev);
