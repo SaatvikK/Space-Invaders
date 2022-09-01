@@ -1,9 +1,10 @@
 # Space Invaders
  Space Invaders for NEA comp sci.
 
+**Code is out of date (so some dependencies may not work) - this isn't being maintained**
 
 **Running the Game**
-There currently is no executable for this game (working on that), so in order to run the game follow the steps:
+There currently is no executable for this game, so in order to run the game follow the steps:
 1. Ensure you have Python 3.8 or higher installed.
 2. Ensure you have Pip installed.
 3. Download the main repo into whatever directory you want (and remember to extract the repo from the .zip file if you downloaded as a .zip).
